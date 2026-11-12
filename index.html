@@ -39,6 +39,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{
   background:var(--bg);
@@ -611,7 +612,7 @@ tr:last-child td{border-bottom:0}
       </div>
       <div class="card">
         <h3>Envío por colonia<small id="envCount"></small></h3>
-        <p class="hint">Cuando escribes la colonia (o el cliente la elige en tu link) el envío se suma solo. Cambia aquí los precios cuando quieras.</p>
+        <p class="hint">Cuando escribes la colonia (o el cliente la elige en tu link) el envío se suma solo. Si cambias precios aquí, vuelve a mandar tu link a los clientes para que vean los nuevos.</p>
         <div class="field"><label for="envBusca">Buscar colonia</label><input id="envBusca" type="search" placeholder="Ej. Brisas"></div>
         <div id="envList" class="envlist"></div>
         <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" id="btnEnvAdd">Agregar colonia</button><button class="btn" type="button" id="btnEnvSave">Guardar precios</button></div>
@@ -636,9 +637,9 @@ tr:last-child td{border-bottom:0}
       <div class="card help">
         <h3>Imprimir tickets</h3>
         <ol>
-          <li>Funciona con impresoras térmicas de 58 mm por Bluetooth.</li>
-          <li>Instala en el celular la app gratuita <b>RawBT</b> (Play Store) y conecta ahí tu impresora.</li>
-          <li>En cada pedido toca <b>Imprimir</b>, elige la impresora <b>RawBT</b> y listo.</li>
+          <li>En cada pedido toca <b>Imprimir</b>: sale un ticket de 58 mm con tu logo.</li>
+          <li><b>iPhone:</b> solo imprime en impresoras compatibles con <b>AirPrint</b> (la mayoría de las térmicas baratas no lo son).</li>
+          <li><b>Android:</b> instala la app gratuita <b>RawBT</b>, conecta ahí tu impresora térmica Bluetooth y elígela al imprimir.</li>
         </ol>
       </div>
       <div class="card">
@@ -653,10 +654,10 @@ tr:last-child td{border-bottom:0}
         </div>
       </div>
       <div class="card help">
-        <h3>Cómo usarla con WhatsApp</h3>
+        <h3>Cómo te llegan los pedidos</h3>
         <ol>
-          <li>Cuando te llegue un pedido por WhatsApp, deja el dedo sobre el mensaje y toca <b>Copiar</b>.</li>
-          <li>Abre esta app y toca <b>Pegar mensaje de WhatsApp</b>. La app llena lo que entiende (pizzas, teléfono y dirección). Revisa y corrige si hace falta.</li>
+          <li><b>Por tu link:</b> el pedido aparece solo hasta arriba en <b>Nuevo</b>. Toca <b>Aceptar</b>, elige el tiempo de entrega y <b>Guardar pedido</b>.</li>
+          <li><b>Por WhatsApp:</b> deja el dedo sobre el mensaje del cliente y toca <b>Copiar</b>. En la app toca el botón verde <b>Pegar pedido de WhatsApp</b>: se llenan las pizzas, teléfono, dirección, colonia y envío. Revisa y corrige si hace falta.</li>
           <li>Toca <b>Guardar pedido</b> y luego <b>Confirmar por WhatsApp</b>: se abre el chat del cliente con el resumen y la hora de entrega ya escritos. Solo envías.</li>
           <li>Para mandar tus ventas: en <b>Reportes</b> toca <b>Mandar resumen por WhatsApp</b> y elige el contacto. Para el archivo completo, en <b>Ajustes</b> toca <b>Pedidos en Excel</b> y elige WhatsApp.</li>
         </ol>
@@ -970,7 +971,7 @@ function renderCambio(){
 }
 function validar(){
   const faltaIng=cart.some(c=>menu.some(p=>p.id===c.pid&&p.combinada)&&c.ing.length!==2);
-  const ok=cart.length>0&&!faltaIng&&(tipo!=="Domicilio"||$("cDir").value.trim().length>3);
+  const ok=cart.length>0&&!faltaIng&&(tipo!=="Domicilio"||$("cDir").value.trim().length>=3);
   $("btnGuardar").disabled=!ok||!idb;
   $("btnGuardar").title=!cart.length?"Agrega al menos una pizza":(!ok?"Falta la dirección":"");
 }
@@ -1493,7 +1494,10 @@ function linkMenu(){
   if(Number(aj.promoCoca)!==50)data.pc=aj.promoCoca;
   if(JSON.stringify(m)!==MENU_BASE_LINK)data.m=m;
   if(linea){data.t=linea.topic;data.k=linea.pub;}
-  if(JSON.stringify(envios)!==JSON.stringify(ENVIOS_INICIALES))data.e=envios;
+  {const base={};ENVIOS_INICIALES.forEach(e=>base[colKey(e[0])]=e);const act={};envios.forEach(e=>act[colKey(e[0])]=e);
+   const cambios=envios.filter(e=>{const b=base[colKey(e[0])];return !b||b[1]!==e[1]||b[0]!==e[0];});
+   const quitadas=ENVIOS_INICIALES.filter(e=>!act[colKey(e[0])]).map(e=>e[0]);
+   if(cambios.length)data.ec=cambios;if(quitadas.length)data.eq=quitadas;}
   const b64=btoa(unescape(encodeURIComponent(JSON.stringify(data)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
   return new URL("menu.html",location.href).href+"#"+b64;}
 $("btnMenuVer").addEventListener("click",()=>{const a=document.createElement("a");a.href=linkMenu();a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();});
@@ -1659,6 +1663,8 @@ function renderBandeja(){
       return '<article class="olinea"><div class="top"><b>'+esc(o.nombre||"Cliente")+'</b><span class="num gold-text">'+money(calcular(its).total+env)+'</span></div>'+
       '<small class="num">'+hhmm(new Date(b.recibido))+' · '+esc(o.tipo==="Para llevar"?"Pasa por ella":"A domicilio")+' · '+esc(o.pago||"")+(o.tel?' · '+esc(o.tel):'')+'</small>'+
       '<div>'+its.map(i=>esc(i.cant+" × "+nombreLinea(i)+(i.orilla?" + orilla":""))).join("<br>")+'</div>'+
+      (Number(o.total)&&Math.abs(Number(o.total)-(calcular(its).total+env))>0.5?'<small style="color:#ffb08a;font-weight:700">⚠️ El cliente vio '+money(o.total)+' (su link tiene precios viejos). Confírmale el total.</small>':'')+
+      (its.length<(o.items||[]).length?'<small style="color:#ffb08a;font-weight:700">⚠️ Pidió algo que ya no está en tu menú: '+esc((o.items||[]).filter(it=>!menu.find(x=>norm(x.nombre)===norm(it.n)||norm(it.n).includes(norm(x.nombre)))).map(it=>it.c+" "+it.n).join(", "))+'</small>':'')+
       (o.dir?'<small>📍 '+esc(o.dir)+(o.col?', '+esc(o.col):'')+(o.ref?' · '+esc(o.ref):'')+'</small>':'')+(ec?'<small>🛵 Envío a '+esc(ec[0])+': '+money(env)+'</small>':(o.col&&o.tipo!=="Para llevar"?'<small>🛵 Colonia fuera del tabulador: pon el envío a mano</small>':''))+(o.nota?'<small>📝 '+esc(o.nota)+'</small>':'')+
       '<div class="acts"><button class="btn ghost" type="button" data-rech="'+esc(b.id)+'">Rechazar</button><button class="btn" type="button" data-acep="'+esc(b.id)+'">Aceptar</button></div></article>';}).join("")+'</section>':"";
 }
@@ -1793,7 +1799,7 @@ $("fileImport").addEventListener("change",async e=>{
     if(Array.isArray(d.envios)&&d.envios.length){envios=d.envios;await putKV("envios",envios);envDraft=null;}
     if(d.ajustes){aj=Object.assign({},AJUSTES_INICIALES,d.ajustes);await putKV("ajustes",aj);}
     draft=null;renderMenu();renderAjustes();refrescarHoy();toast("Respaldo restaurado");
-  }catch(_){status("Ese archivo no es un respaldo de Pizzas Luna. Elige el .json que descargaste con “Descargar respaldo”.");}
+  }catch(_){status("Ese archivo no es un respaldo de Pizzas Luna. Elige el archivo .json que guardaste con “Guardar respaldo”.");}
 });
 
 // ================= arranque =================

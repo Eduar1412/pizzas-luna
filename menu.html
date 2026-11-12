@@ -23,6 +23,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);background-image:radial-gradient(ellipse 90% 50% at 50% 0,rgba(255,150,40,.16),transparent 70%);color:var(--ink);font-family:var(--font-body);line-height:1.4;padding-bottom:110px}
 button,input,textarea{font:inherit;color:inherit}
@@ -158,7 +159,11 @@ const INGREDIENTES=["Peperoni","Hawaiana","Carnes frías","Mexicana","Italiana",
 // menú por defecto; el link que comparte la pizzería trae los precios vigentes y su WhatsApp
 let cfg={w:"",h:"",o:30,pc:50,m:[["Peperoni",110,0,0,0,0],["Hawaiana",140,0,1,0,0],["Carnes frías",140,0,1,0,0],["Mexicana",140,0,1,0,0],["Champiñones",140,0,1,0,0],["Luna italiana",140,0,1,0,0],["Combinada",140,0,1,1,0],["Mixta",190,0,0,0,0],["Coca desechable 2.5 L",60,1,0,0,1]]};
 try{const hsh=location.hash.slice(1);if(hsh){const j=JSON.parse(decodeURIComponent(escape(atob(hsh.replace(/-/g,"+").replace(/_/g,"/")))));if(j&&typeof j==="object"){if(!Array.isArray(j.m))delete j.m;cfg=Object.assign(cfg,j);}}}catch(_){}
-const envios=Array.isArray(cfg.e)&&cfg.e.length?cfg.e:ENVIOS_BASE;
+const envios=(()=>{if(Array.isArray(cfg.e)&&cfg.e.length)return cfg.e;
+  const quitar=new Set((cfg.eq||[]).map(colKey));const mapa=new Map();
+  ENVIOS_BASE.forEach(e=>{if(!quitar.has(colKey(e[0])))mapa.set(colKey(e[0]),e);});
+  (Array.isArray(cfg.ec)?cfg.ec:[]).forEach(e=>{if(Array.isArray(e)&&e[0])mapa.set(colKey(e[0]),[String(e[0]),Number(e[1])||0]);});
+  return [...mapa.values()].sort((a,b)=>a[0].localeCompare(b[0],"es"));})();
 const buscarColonia=n=>{const k=colKey(n);return k?envios.find(e=>colKey(e[0])===k)||null:null;};
 function detectarColonia(t){const x=" "+colKey(t)+" ";let best=null;envios.forEach(e=>{const k=colKey(e[0]);if(k.length>=4&&x.includes(" "+k+" ")&&(!best||k.length>colKey(best[0]).length))best=e;});return best;}
 function sugerir(q){const k=colKey(q);if(k.length<2)return[];const a=envios.filter(e=>colKey(e[0]).startsWith(k)),b=envios.filter(e=>!colKey(e[0]).startsWith(k)&&colKey(e[0]).includes(k));return a.concat(b).slice(0,6);}
@@ -168,9 +173,9 @@ function renderEnvio(){const el=$("envInfo");
   if(tipo!=="Domicilio"||(!colSel&&!colOtra)){el.hidden=true;return;}
   el.hidden=false;el.className="envio"+(colSel?"":" pend");
   el.innerHTML=colSel?'<span>🛵 Envío a '+esc(colSel[0])+'</span><span class="num">'+money(colSel[1])+'</span>':'<span>🛵 Envío a tu colonia</span><span>Te confirmamos el costo</span>';}
-function elegirColonia(e,otra){colSel=e;colOtra=!!otra;if(e)$("col").value=e[0];$("colSug").innerHTML="";renderEnvio();render();}
+function elegirColonia(e,otra,escribiendo){colSel=e;colOtra=!!otra;if(e&&!escribiendo)$("col").value=e[0];$("colSug").innerHTML="";renderEnvio();render();}
 $("col").addEventListener("input",()=>{const q=$("col").value;const ex=buscarColonia(q);colOtra=false;
-  if(ex){elegirColonia(ex);return;}colSel=null;renderEnvio();render();
+  if(ex){elegirColonia(ex,false,true);return;}colSel=null;renderEnvio();render();
   const s=sugerir(q);$("colSug").innerHTML=s.map(e=>'<button type="button" data-col="'+esc(e[0])+'"><span>'+esc(e[0])+'</span><small class="num">envío '+money(e[1])+'</small></button>').join("")+
     (colKey(q).length>=3?'<button type="button" class="otra" data-otra="1">Mi colonia no aparece en la lista</button>':'');});
 $("colSug").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.col)elegirColonia(buscarColonia(b.dataset.col));else if(b.dataset.otra)elegirColonia(null,true);});
