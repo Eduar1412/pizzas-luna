@@ -1811,14 +1811,25 @@ $("dinaBanner").addEventListener("click",async e=>{
   dinaHoy={fecha:dayKey(),modo:b.id==="dinaOn"?"on":(dinaRazones().length&&aj.dinaAuto!==false?"off":"auto")};
   await putKV("dinaHoy",dinaHoy);renderDina();renderCart();renderBandeja();
   if(dinaActiva()&&!cart.length){entrega="45/50";setSeg("segEntrega",entrega);}
-  toast(dinaActiva()?"Dinámica activada: +"+money(aj.dinaMonto)+" en cada envío de hoy":"Dinámica quitada por hoy");
+  toast(dinaActiva()?"Dinámica activada: +"+money(aj.dinaMonto)+" en cada envío de hoy (también en tu link)":"Dinámica quitada por hoy (también en tu link)");
+  publicarEstado(true);
 });
+// Avisa al link de clientes cuando ella activa o quita la dinámica a mano
+let ultPublicado=0;
+function publicarEstado(forzar){
+  if(!linea||!navigator.onLine)return;
+  const modo=dinaModo();if(modo==="auto"&&!forzar)return;
+  if(!forzar&&Date.now()-ultPublicado<2*36e5)return;
+  ultPublicado=Date.now();
+  avisarCliente(linea.topic+"-estado",{tipo:"dina",fecha:dayKey(),modo,activa:dinaActiva(),monto:Number(aj.dinaMonto)||0,motivo:modo==="on"?"indicación del grupo de reparto":""});
+}
+setInterval(()=>{if(!document.hidden)publicarEstado(false);},10*6e4);
 $("btnPagoGuardar").addEventListener("click",()=>guardarAj({prepago:$("aPrepago").checked,pagoCuenta:$("aCuenta").value.replace(/\s+/g,""),pagoBanco:$("aBanco").value.trim(),pagoTitular:$("aTitular").value.trim()},"Datos de pago guardados"));
-$("btnDinaGuardar").addEventListener("click",()=>guardarAj({dinaMonto:Math.max(0,parseFloat($("aDinaMonto").value)||0),dinaTemp:parseFloat($("aDinaTemp").value)||10,dinaAuto:$("aDinaAuto").checked},"Dinámica guardada").then(()=>{renderDina();renderCart();}));
+$("btnDinaGuardar").addEventListener("click",()=>guardarAj({dinaMonto:Math.max(0,parseFloat($("aDinaMonto").value)||0),dinaTemp:parseFloat($("aDinaTemp").value)||10,dinaAuto:$("aDinaAuto").checked},"Dinámica guardada").then(()=>{renderDina();renderCart();if(dinaModo()!=="auto")publicarEstado(true);}));
 async function revisarClima(){
   const antes=dinaActiva();
   try{await leerClima();}catch(_){}
-  renderDina();renderCart();renderBandeja();
+  renderDina();renderCart();renderBandeja();publicarEstado(false);
   if(!antes&&dinaActiva()){toast("🛵 Dinámica de reparto activa hoy: "+dinaMotivo());if(!cart.length){entrega="45/50";setSeg("segEntrega",entrega);}}
 }
 setInterval(()=>{if(!document.hidden)revisarClima();},15*6e4);

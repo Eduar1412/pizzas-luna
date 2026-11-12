@@ -356,8 +356,20 @@ const nombreL=l=>P(l.pid).nombre+(l.ing&&l.ing.length?" ("+l.ing.join(" + ")+")"
 
 // ---------- dinámica ----------
 const DINA_MONTO=Number(cfg.dm)||10,DINA_TEMP=Number(cfg.dt)||10,DINA_AUTO=cfg.da!==0;
-function dinaRaz(){return DINA_AUTO?razonesDinamica(DINA_TEMP):[];}
-function dinaExtra(){return tipo==="Domicilio"&&colSel&&dinaRaz().length?DINA_MONTO:0;}
+let dinaManual=null;// lo que tu hermana activó o quitó hoy desde su app
+function hoyKey(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function dinaRaz(){if(dinaManual&&dinaManual.fecha===hoyKey()){if(dinaManual.modo==="off")return[];if(dinaManual.modo==="on"){const r=DINA_AUTO?razonesDinamica(DINA_TEMP):[];return r.length?r:[dinaManual.motivo||"indicación del grupo de reparto"];}}
+  return DINA_AUTO?razonesDinamica(DINA_TEMP):[];}
+function dinaMonto(){return dinaManual&&dinaManual.fecha===hoyKey()&&Number(dinaManual.monto)>0?Number(dinaManual.monto):DINA_MONTO;}
+function dinaExtra(){return tipo==="Domicilio"&&colSel&&dinaRaz().length?dinaMonto():0;}
+async function leerEstado(){
+  if(!cfg.t)return;
+  try{const r=await fetch("https://ntfy.sh/"+cfg.t+"-estado/json?poll=1&since=12h",{cache:"no-store"});if(!r.ok)return;
+    let ult=null;(await r.text()).split("\n").filter(Boolean).forEach(l=>{try{const m=JSON.parse(l);if(m.event!=="message")return;const d=JSON.parse(m.message);if(d&&d.tipo==="dina"&&(!ult||(d.t||0)>=(ult.t||0)))ult=d;}catch(_){}});
+    const antes=JSON.stringify(dinaManual);dinaManual=ult;
+    if(JSON.stringify(dinaManual)!==antes){renderTop();renderEnvio();renderCart();}
+  }catch(_){}
+}
 function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]+dinaExtra():0;}
 function calc(){let sub=0,esp=0,cocas=0;
   lines.forEach(l=>{const p=P(l.pid);sub+=(p.precio+(l.orilla?Number(cfg.o):0))*l.cant;if(p.esp)esp+=l.cant;if(p.coca)cocas+=l.cant;});
@@ -374,7 +386,7 @@ function renderTop(){
   $("chips").innerHTML=ch.join("");
   $("promo").innerHTML=cocaP&&cfg.pc<cocaP.precio?'<span class="big">🍕🥤</span><span><b>Promo de la casa</b><small>Cualquier pizza de especialidad + '+esc(cocaP.nombre)+' por solo '+money(cfg.pc)+' más</small></span>':'<span class="big">🌙</span><span><b>Hecha al momento</b><small>Elige tus pizzas y te las llevamos calientitas</small></span>';
   const d=$("dina");d.hidden=!r.length;
-  if(r.length)d.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(DINA_MONTO)+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. ¡Gracias por tu comprensión! 💛';
+  if(r.length)d.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(dinaMonto())+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. ¡Gracias por tu comprensión! 💛';
 }
 function renderProds(){
   const fila=p=>{const c=cantDe(p.id),mis=lines.filter(l=>l.pid===p.id);
@@ -555,6 +567,8 @@ function renderEnCurso(){
 
 renderTop();renderEnvio();render();renderEnCurso();
 (async()=>{try{await leerClima();}catch(_){}renderTop();renderEnvio();renderCart();})();
+leerEstado();setInterval(()=>{if(!document.hidden)leerEstado();},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)leerEstado();});
 {const a=LS.get("pl-activo");if(a&&a.seg&&!["entregado","rechazado","cancelado"].includes(a.estado)){revisarEstado();setInterval(()=>{if(!document.hidden&&$("pantalla").hidden)revisarEstado();},20000);}}
 })();
 </script>
