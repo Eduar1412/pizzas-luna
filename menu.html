@@ -3,21 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Menú Pizzas Luna</title>
-<meta name="description" content="Arma tu pedido de Pizzas Luna y mándalo por WhatsApp. Sabores que enamoran, de la luna a tu mesa.">
-<meta property="og:title" content="Pizzas Luna · Haz tu pedido">
-<meta property="og:description" content="Sabores que enamoran, de la luna a tu mesa. Elige tus pizzas y pide por WhatsApp.">
+<title>Pizzas Luna · Pide aquí</title>
+<meta name="description" content="Arma tu pedido de Pizzas Luna en un minuto. Sabores que enamoran, de la luna a tu mesa.">
+<meta property="og:title" content="Pizzas Luna 🌙 · Haz tu pedido">
+<meta property="og:description" content="Sabores que enamoran, de la luna a tu mesa. Elige tus pizzas y sigue tu pedido en vivo.">
 <meta property="og:image" content="icon-512.png">
 <meta name="theme-color" content="#0b0805">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Marcellus&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Marcellus&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* Menú para clientes de Pizzas Luna: mismo mundo noche y oro del logo; una columna, carrito fijo abajo */
+/* Pizzas Luna · menú para clientes. Noche y oro del logo; tarjetas con ilustraciones de cada pizza;
+   barra de pedido fija abajo; después de enviar: pantalla de pago y seguimiento en vivo. */
 :root{
   --bg:#0b0805;--surface:#17110b;--surface-2:#211810;--line:rgba(232,181,74,.22);
-  --ink:#f7ecd6;--muted:#ab9a7c;--gold:#e9b44c;--gold-hi:#ffdf8a;--gold-lo:#b97a1e;--ember:#ff6a2b;--ok:#6fd38a;
+  --ink:#f7ecd6;--muted:#ab9a7c;--gold:#e9b44c;--gold-hi:#ffdf8a;--gold-lo:#b97a1e;--ember:#ff6a2b;--ok:#6fd38a;--sky:#8cc8ff;
   --gold-grad:linear-gradient(135deg,#ffe39a 0%,#f0bb52 45%,#c8861f 100%);
   --font-brand:"Great Vibes","Brush Script MT",cursive;--font-display:"Marcellus",Georgia,serif;--font-body:"Nunito","Segoe UI",system-ui,sans-serif;
   color-scheme:dark;
@@ -25,98 +26,179 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
-body{background:var(--bg);background-image:radial-gradient(ellipse 90% 50% at 50% 0,rgba(255,150,40,.16),transparent 70%);color:var(--ink);font-family:var(--font-body);line-height:1.4;padding-bottom:110px}
+body{background:var(--bg);background-image:radial-gradient(ellipse 90% 45% at 50% 0,rgba(255,150,40,.18),transparent 70%);color:var(--ink);font-family:var(--font-body);line-height:1.4;padding-bottom:120px}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--gold-hi);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
 .gold-text{background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.wrap{max-width:620px;margin:0 auto;padding:0 16px}
-.hero{text-align:center;padding:28px 0 8px}
-.hero img{width:150px;height:150px;border-radius:50%;box-shadow:0 0 40px rgba(255,170,50,.45)}
-.hero h1{font-family:var(--font-brand);font-weight:400;font-size:3.2rem;margin:8px 0 0;line-height:1}
-.hero p{color:var(--muted);margin:6px 0 0}
-.hero .hor[hidden]{display:none}
-.hero .hor{display:inline-block;margin-top:10px;font-size:.88rem;border:1px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--gold-hi)}
-.promo{margin:18px 0;border:1px dashed var(--gold-lo);border-radius:16px;padding:14px;text-align:center;background:rgba(240,187,82,.07)}
-.promo b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.25rem;color:var(--gold-hi)}
-h2{font-family:var(--font-display);font-weight:400;color:var(--gold-hi);font-size:1.3rem;margin:22px 0 10px;letter-spacing:.03em}
-.item{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:linear-gradient(160deg,#241a10,#140f09);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
-.item .n{font-weight:800;font-size:1.05rem}
-.item .n small{display:block;font-weight:600;color:var(--muted);font-size:.8rem}
-.item .p{font-weight:800;font-size:1.15rem}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+h2{font-family:var(--font-display);font-weight:400;color:var(--gold-hi);font-size:1.35rem;margin:26px 0 12px;letter-spacing:.03em;display:flex;align-items:center;gap:10px}
+h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* Encabezado */
+.hero{text-align:center;padding:26px 0 6px;position:relative}
+.hero img{width:136px;height:136px;border-radius:50%;box-shadow:0 0 44px rgba(255,170,50,.5);animation:flota 6s ease-in-out infinite}
+@keyframes flota{50%{transform:translateY(-6px)}}
+.hero h1{font-family:var(--font-brand);font-weight:400;font-size:3.3rem;margin:6px 0 0;line-height:1}
+.hero p{color:var(--muted);margin:4px 0 0}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px}
+.chip{font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--gold-hi);background:rgba(23,17,11,.6)}
+.chip.sky{color:var(--sky);border-color:rgba(140,200,255,.45)}
+.stars{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#ffe9b0;opacity:.0;animation:brilla 4s ease-in-out infinite}
+@keyframes brilla{50%{opacity:.9}}
+
+/* Tarjetas de aviso */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.promo{margin:18px 0 6px;border-radius:18px;padding:14px 16px;display:flex;gap:14px;align-items:center;background:linear-gradient(120deg,rgba(255,215,120,.16),rgba(255,106,43,.1),rgba(255,215,120,.16));background-size:200% 100%;animation:brillo 6s linear infinite;border:1px solid var(--gold-lo)}
+@keyframes brillo{to{background-position:-200% 0}}
+.promo .big{font-size:2rem}
+.promo b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.15rem;color:var(--gold-hi)}
+.promo small{color:var(--ink);opacity:.85}
+.dina{border-radius:16px;padding:12px 14px;margin:10px 0;background:rgba(95,176,255,.1);border:1px solid rgba(95,176,255,.4);color:#cfe6ff;font-size:.9rem}
+.dina b{display:block}
+.repetir{display:flex;gap:12px;align-items:center;margin-top:14px;border:1.5px dashed var(--gold);border-radius:16px;padding:12px 14px;background:rgba(240,187,82,.06)}
+.repetir .tx{flex:1;font-size:.9rem}
+.repetir b{color:var(--gold-hi);display:block}
+.repetir button{border:0;border-radius:12px;padding:10px 14px;font-weight:800;background:var(--gold-grad);color:#1a1006}
+
+/* Navegación de categorías */
+.cats{position:sticky;top:0;z-index:5;display:flex;gap:8px;padding:10px 0;background:linear-gradient(var(--bg) 70%,transparent)}
+.cats a{text-decoration:none;color:var(--ink);font-weight:800;font-size:.9rem;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--surface)}
+
+/* Productos */
+.item{position:relative;display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;background:linear-gradient(160deg,#241a10,#130e08);border:1px solid var(--line);border-radius:20px;padding:12px;margin-bottom:12px;transition:border-color .2s,transform .15s}
+.item.en{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset,0 8px 24px rgba(240,170,60,.12)}
+.item .art{width:84px;height:84px}
+.item .art svg{width:100%;height:100%;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.item .n{font-weight:900;font-size:1.08rem;line-height:1.15}
+.item .d{color:var(--muted);font-size:.84rem;margin:3px 0 8px}
+.item .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item .p{font-weight:900;font-size:1.2rem}
+.badge{display:inline-block;font-size:.66rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#1a1006;background:var(--gold-grad);padding:2px 7px;border-radius:6px;margin:0 6px 4px 0}
+.badge.fire{background:linear-gradient(135deg,#ffb36b,#ff6a2b);color:#fff}
 .qty{display:flex;align-items:center;gap:8px}
-.qty button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);font-weight:800;font-size:1.2rem;line-height:1}
-.qty .add{background:var(--gold-grad);color:#1a1006;border:0}
-.qty span{min-width:18px;text-align:center;font-weight:800}
+.qty button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);font-weight:900;font-size:1.25rem;line-height:1}
+.qty .add{background:var(--gold-grad);color:#1a1006;border:0;box-shadow:0 4px 14px rgba(240,170,60,.35)}
+.qty span{min-width:20px;text-align:center;font-weight:900}
+.pop{animation:pop .35s ease}
+@keyframes pop{40%{transform:scale(1.25)}}
 .extra{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1.5px solid var(--line);background:var(--surface-2);border-radius:999px;padding:7px 12px;font-weight:700;font-size:.85rem}
-.chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-hi);background:rgba(240,187,82,.14)}
-.tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#1a1006;background:var(--gold-grad);padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:2px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
-.field{display:grid;gap:5px;margin-bottom:10px}
-.field label{font-size:.82rem;color:var(--muted);font-weight:700}
-.field input,.field textarea{border:1.5px solid var(--line);background:#0f0b07;border-radius:12px;padding:12px;width:100%;font-size:1rem}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.seg.two{grid-template-columns:1fr 1fr}
-.seg button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:11px 6px;font-weight:700;font-size:.92rem}
-.seg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-hi);background:rgba(240,187,82,.14)}
+.extra small{width:100%;color:var(--muted)}
+.tog{border:1.5px solid var(--line);background:var(--surface-2);border-radius:999px;padding:7px 12px;font-weight:800;font-size:.84rem}
+.tog[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-hi);background:rgba(240,187,82,.14)}
+
+/* Carrito */
 .lines div{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
 .lines .disc{color:var(--ok)}
-.lines .tot{border-top:1px dashed var(--gold-lo);margin-top:6px;padding-top:10px;font-weight:800;font-size:1.2rem}
-.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(11,8,5,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
-.bar button{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:620px;margin:0 auto;border:0;border-radius:14px;padding:15px 18px;font-weight:800;font-size:1.05rem;background:#25d366;color:#062b13;box-shadow:0 6px 22px rgba(37,211,102,.3)}
-.bar button:disabled{background:var(--surface-2);color:var(--muted);box-shadow:none;cursor:not-allowed}
-.hint{color:var(--muted);font-size:.85rem;margin:6px 0 0}
-.err{color:#ff8a7a;font-size:.88rem;margin:8px 0 0;min-height:1.2em}
-.bar button.online{background:var(--gold-grad);color:#1a1006;box-shadow:0 6px 22px rgba(240,170,60,.3)}
-.done{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px;z-index:30}
-.done[hidden]{display:none}
-.done-card{background:var(--surface);border:1px solid var(--gold-lo);border-radius:22px;padding:24px 20px;max-width:420px;width:100%;text-align:center;box-shadow:0 0 50px rgba(255,170,50,.25)}
-.done-card img{border-radius:50%;box-shadow:0 0 30px rgba(255,170,50,.5)}
-.done-card h2{margin:12px 0 6px;font-size:1.6rem}
-.done-card p{color:var(--muted);margin:0 0 14px}
-.done-card .resumen{text-align:left;background:#0f0b07;border-radius:12px;padding:10px 12px;font-size:.92rem;margin-bottom:14px;white-space:pre-line}
-.done-card .ok{border:0;border-radius:14px;padding:14px;width:100%;font-weight:800;font-size:1.05rem;background:var(--gold-grad);color:#1a1006}
-.alt{display:block;text-align:center;margin:10px auto 0;color:var(--muted);font-size:.85rem;background:none;border:0;text-decoration:underline;text-underline-offset:3px}
+.lines .dn{color:var(--sky)}
+.lines .tot{border-top:1px dashed var(--gold-lo);margin-top:6px;padding-top:10px;font-weight:900;font-size:1.25rem}
+.sugiere{display:flex;gap:12px;align-items:center;margin-top:12px;border-radius:14px;padding:10px 12px;background:rgba(111,211,138,.08);border:1px solid rgba(111,211,138,.35)}
+.sugiere .tx{flex:1;font-size:.9rem}
+.sugiere b{color:var(--ok)}
+.sugiere button{border:0;border-radius:10px;padding:9px 12px;font-weight:900;background:var(--ok);color:#06210f;flex:0 0 auto}
+
+/* Datos */
+.field{display:grid;gap:5px;margin-bottom:10px}
+.field label{font-size:.82rem;color:var(--muted);font-weight:800}
+.field input{border:1.5px solid var(--line);background:#0f0b07;border-radius:12px;padding:13px;width:100%;font-size:1rem}
+.field input:focus{border-color:var(--gold);outline:none}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.seg.two{grid-template-columns:1fr 1fr}
+.seg button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px 6px;font-weight:800;font-size:.92rem}
+.seg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-hi);background:rgba(240,187,82,.14)}
 .sug{display:grid;gap:6px;margin:-4px 0 10px}
 .sug button{text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:.95rem;display:flex;justify-content:space-between;gap:10px}
-.sug button small{color:var(--gold-hi);font-weight:800}
+.sug button small{color:var(--gold-hi);font-weight:900}
 .sug .otra{color:var(--muted);font-size:.85rem;justify-content:center}
 .envio{margin:-4px 0 12px;padding:10px 12px;border-radius:12px;font-weight:800;font-size:.92rem;display:flex;justify-content:space-between;gap:10px;background:rgba(111,211,138,.1);color:var(--ok);border:1px solid rgba(111,211,138,.3)}
 .envio.pend{background:rgba(240,187,82,.08);color:var(--gold-hi);border-color:var(--gold-lo)}
-.dina{margin:-6px 0 18px;border-radius:16px;padding:12px 14px;text-align:center;background:rgba(95,176,255,.12);border:1px solid rgba(95,176,255,.45);color:#cfe6ff;font-size:.92rem}
-.dina b{display:block;font-size:1rem}
-footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
+.pago-info{border-radius:12px;padding:10px 12px;background:rgba(95,176,255,.08);border:1px solid rgba(95,176,255,.35);font-size:.9rem;margin-bottom:12px}
+.pago-info b{color:var(--sky)}
+.err{color:#ff8a7a;font-size:.9rem;margin:8px 0 0;min-height:1.2em;font-weight:700}
+.alt{display:block;text-align:center;margin:10px auto 0;color:var(--muted);font-size:.85rem;background:none;border:0;text-decoration:underline;text-underline-offset:3px}
+
+/* Barra fija */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(11,8,5,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.bar button{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;max-width:640px;margin:0 auto;border:0;border-radius:16px;padding:15px 18px;font-weight:900;font-size:1.05rem;background:var(--gold-grad);color:#1a1006;box-shadow:0 6px 22px rgba(240,170,60,.3)}
+.bar button:disabled{background:var(--surface-2);color:var(--muted);box-shadow:none;cursor:not-allowed}
+.bar .cnt{background:#1a1006;color:var(--gold-hi);border-radius:999px;min-width:28px;height:28px;display:inline-grid;place-items:center;padding:0 8px;font-size:.9rem}
+.bar .izq{display:flex;align-items:center;gap:10px}
+.bump{animation:bump .4s ease}
+@keyframes bump{30%{transform:translateY(-6px)}}
+
+/* Pantalla de pago y seguimiento */
+.pantalla{position:fixed;inset:0;z-index:20;overflow:auto;background:var(--bg);background-image:radial-gradient(ellipse 90% 45% at 50% 0,rgba(255,150,40,.18),transparent 70%);padding:20px 16px calc(30px + env(safe-area-inset-bottom))}
+.pantalla .wrap{padding:0}
+.pantalla .top{text-align:center}
+.pantalla .top img{width:90px;height:90px;border-radius:50%;box-shadow:0 0 30px rgba(255,170,50,.5)}
+.pantalla h3{font-family:var(--font-display);font-weight:400;font-size:1.6rem;color:var(--gold-hi);margin:10px 0 4px}
+.pantalla .sub{color:var(--muted);margin:0 0 16px}
+.monto{font-size:2.6rem;font-weight:900;text-align:center;margin:4px 0}
+.dato{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.dato:last-child{border-bottom:0}
+.dato small{display:block;color:var(--muted);font-size:.78rem}
+.dato b{font-size:1.05rem;word-break:break-all}
+.copiar{border:1px solid var(--gold-lo);background:rgba(240,187,82,.1);color:var(--gold-hi);border-radius:10px;padding:8px 12px;font-weight:800;font-size:.85rem;flex:0 0 auto}
+.pasos{margin:0;padding-left:22px;display:grid;gap:8px;font-size:.95rem}
+.btn{display:block;width:100%;border:0;border-radius:16px;padding:15px;font-weight:900;font-size:1.05rem;text-align:center;text-decoration:none;background:var(--gold-grad);color:#1a1006}
+.btn.wa{background:#25d366;color:#04220f;box-shadow:0 6px 22px rgba(37,211,102,.3)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.track{list-style:none;margin:0;padding:0}
+.track li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:0 0 18px;position:relative}
+.track li::before{content:"";position:absolute;left:16px;top:30px;bottom:0;width:2px;background:var(--line)}
+.track li:last-child::before{display:none}
+.track .pt{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);border:2px solid var(--line);font-size:1rem}
+.track li.ok .pt{background:var(--gold-grad);border-color:var(--gold);color:#1a1006}
+.track li.ok::before{background:var(--gold)}
+.track li.now .pt{border-color:var(--gold-hi);box-shadow:0 0 0 6px rgba(255,223,138,.15);animation:late 1.6s infinite}
+@keyframes late{50%{box-shadow:0 0 0 10px rgba(255,223,138,.05)}}
+.track b{display:block}
+.track small{color:var(--muted)}
+.track li.off{opacity:.45}
+.mal{border-color:rgba(255,91,74,.5);background:rgba(255,91,74,.08)}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--gold-grad);color:#1a1006;padding:11px 16px;border-radius:12px;font-weight:900;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="hero">
-    <img src="logo.jpg" alt="Logo de Pizzas Luna" width="150" height="150">
+    <div class="stars" id="stars" aria-hidden="true"></div>
+    <img src="logo.jpg" alt="Logo de Pizzas Luna" width="136" height="136">
     <h1 class="gold-text">Pizzas Luna</h1>
     <p>Sabores que enamoran, de la luna a tu mesa</p>
-    <span class="hor" id="horario" hidden></span>
+    <div class="chips" id="chips"></div>
   </header>
+
+  <div id="enCurso"></div>
+  <div id="repetir"></div>
   <div class="promo" id="promo"></div>
   <div class="dina" id="dina" hidden></div>
 
-  <h2>Pizzas</h2>
+  <nav class="cats" aria-label="Secciones del menú"><a href="#sec-pizzas">🍕 Pizzas</a><a href="#sec-bebidas">🥤 Bebidas</a><a href="#sec-pedido">🧾 Mi pedido</a></nav>
+
+  <h2 id="sec-pizzas">Pizzas</h2>
   <div id="pizzas"></div>
-  <h2>Bebidas</h2>
+  <h2 id="sec-bebidas">Bebidas</h2>
   <div id="bebidas"></div>
 
-  <h2>Tu pedido</h2>
+  <h2 id="sec-pedido">Mi pedido</h2>
   <div class="card">
-    <div class="lines" id="lines"><p class="hint">Agrega tus pizzas con el botón +</p></div>
+    <div class="lines" id="lines"></div>
+    <div id="sugiere"></div>
   </div>
-  <div class="card">
+
+  <div class="card" id="datos">
     <div class="seg two" id="segTipo" role="group" aria-label="Tipo de pedido">
-      <button type="button" data-v="Domicilio" aria-pressed="true">A domicilio</button>
-      <button type="button" data-v="Paso por ella" aria-pressed="false">Paso por ella</button>
+      <button type="button" data-v="Domicilio" aria-pressed="true">🛵 A domicilio</button>
+      <button type="button" data-v="Paso por ella" aria-pressed="false">🏃 Paso por ella</button>
     </div>
     <div class="field"><label for="nom">Tu nombre</label><input id="nom" autocomplete="name" placeholder="¿A nombre de quién?"></div>
-    <div class="field"><label for="tel">Tu teléfono (WhatsApp)</label><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 dígitos"></div>
+    <div class="field"><label for="tel">Tu WhatsApp</label><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 dígitos"></div>
     <div id="dirWrap">
       <div class="field"><label for="col">Colonia</label><input id="col" autocomplete="off" placeholder="Escribe tu colonia"></div>
       <div class="sug" id="colSug"></div>
@@ -124,30 +206,52 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
       <div class="field"><label for="dir">Calle y número</label><input id="dir" autocomplete="street-address" placeholder="Ej. Luna 25"></div>
       <div class="field"><label for="ref">Referencias</label><input id="ref" autocomplete="off" placeholder="Ej. portón negro, frente a la tienda"></div>
     </div>
-    <label class="field" style="margin-bottom:6px"><span style="font-size:.82rem;color:var(--muted);font-weight:700">¿Cómo pagas?</span></label>
-    <div class="seg" id="segPago" role="group" aria-label="Forma de pago">
-      <button type="button" data-v="Efectivo" aria-pressed="true">Efectivo</button>
-      <button type="button" data-v="Tarjeta" aria-pressed="false">Tarjeta</button>
-      <button type="button" data-v="Transferencia" aria-pressed="false">Transfer.</button>
+    <div class="pago-info" id="pagoInfo" hidden></div>
+    <div id="pagoSel">
+      <div class="field" style="margin-bottom:6px"><label>¿Cómo pagas?</label></div>
+      <div class="seg" id="segPago" role="group" aria-label="Forma de pago">
+        <button type="button" data-v="Efectivo" aria-pressed="true">Efectivo</button>
+        <button type="button" data-v="Tarjeta" aria-pressed="false">Tarjeta</button>
+        <button type="button" data-v="Transferencia" aria-pressed="false">Transfer.</button>
+      </div>
+      <div class="field" id="conWrap"><label for="con">¿Con cuánto pagas? (para llevarte cambio)</label><input id="con" type="number" inputmode="decimal" min="0" placeholder="Ej. 500"></div>
     </div>
-    <div class="field" id="conWrap"><label for="con">¿Con cuánto pagas? (para llevarte cambio)</label><input id="con" type="number" inputmode="decimal" min="0" placeholder="Ej. 500"></div>
-    <div class="field"><label for="nota">Nota (opcional)</label><input id="nota" autocomplete="off" placeholder="Ej. sin cebolla"></div>
+    <div class="field"><label for="nota">Nota (opcional)</label><input id="nota" autocomplete="off" placeholder="Ej. bien cocida, sin cebolla"></div>
     <p class="err" id="err" role="alert"></p>
     <button type="button" class="alt" id="porWa" hidden>Prefiero mandarlo por WhatsApp</button>
   </div>
-  <footer>Pizzas Luna 🌙 · Los precios pueden cambiar sin aviso</footer>
-</div>
-<div class="bar"><button type="button" id="enviar" disabled><span id="barTxt">Pedir por WhatsApp</span><span class="num" id="barTot">$0</span></button></div>
-<div class="done" id="done" hidden role="dialog" aria-modal="true" aria-labelledby="doneT">
-  <div class="done-card">
-    <img src="logo.jpg" alt="" width="110" height="110">
-    <h2 id="doneT">¡Pedido enviado!</h2>
-    <p id="doneTxt">Tu pedido ya llegó a Pizzas Luna. En unos minutos te confirmamos por WhatsApp con la hora de entrega.</p>
-    <div class="resumen" id="doneRes"></div>
-    <button type="button" class="ok" id="doneOk">Listo</button>
-  </div>
+  <footer>Pizzas Luna 🌙 · Hecho al momento · Los precios pueden cambiar sin aviso</footer>
 </div>
 
+<div class="bar"><button type="button" id="enviar" disabled><span class="izq"><span class="cnt num" id="barCnt">0</span><span id="barTxt">Elige tus pizzas</span></span><span class="num" id="barTot">$0</span></button></div>
+
+<section class="pantalla" id="pantalla" hidden aria-live="polite">
+  <div class="wrap">
+    <div class="top"><img src="logo.jpg" alt="" width="90" height="90"><h3 id="pTit">¡Pedido enviado!</h3><p class="sub" id="pSub"></p></div>
+    <div class="card" id="pPago" hidden>
+      <div style="text-align:center;color:var(--muted);font-weight:800">Total a pagar</div>
+      <div class="monto num gold-text" id="pMonto">$0</div>
+      <div class="dato"><span><small>Banco</small><b id="pBanco"></b></span></div>
+      <div class="dato"><span><small>CLABE</small><b class="num" id="pCuenta"></b></span><button class="copiar" type="button" id="cpCuenta">Copiar</button></div>
+      <div class="dato"><span><small>A nombre de</small><b id="pTitular"></b></span></div>
+      <div class="dato"><span><small>Concepto (escríbelo en tu transferencia)</small><b class="num" id="pRef"></b></span><button class="copiar" type="button" id="cpRef">Copiar</button></div>
+    </div>
+    <div class="card" id="pPasos" hidden>
+      <ol class="pasos">
+        <li>Abre la app de tu banco y <b>transfiere el total</b>.</li>
+        <li>Toma <b>captura del comprobante</b>.</li>
+        <li>Mándanoslo por WhatsApp con este botón 👇</li>
+      </ol>
+      <a class="btn wa" id="pWa" href="#" target="_blank" rel="noopener" style="margin-top:12px">Enviar mi comprobante</a>
+    </div>
+    <div class="card">
+      <ol class="track" id="track"></ol>
+    </div>
+    <div class="card" id="pResumen"></div>
+    <button class="btn ghost" type="button" id="pCerrar">Volver al menú</button>
+  </div>
+</section>
+<div class="toast" id="toast" role="status"></div>
 <script>
 (function(){
 "use strict";
@@ -155,6 +259,11 @@ const $=id=>document.getElementById(id);
 const nf=new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
 const money=n=>nf.format(Math.round(Number(n)||0));
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const hhmm=d=>pad(d.getHours())+":"+pad(d.getMinutes());
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k)||"null");}catch(_){return null;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(_){}},del(k){try{localStorage.removeItem(k);}catch(_){}}};
+let toastT;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2200);}
+async function copiar(txt,msg){try{await navigator.clipboard.writeText(txt);toast(msg||"Copiado ✓");}catch(_){toast("Mantén el dedo sobre el número para copiarlo");}}
 const ENVIOS_BASE=[["Alamedas",65],["Alcali",45],["Arboledas",40],["Arcangeles",70],["Avance Popular",50],["Balcones",45],["Benito Juarez",45],["Brisas",80],["Bugambilias",45],["Cedis de Guadalajara",60],["Centro de Garcia",50],["Cerritos",70],["Colinas del Rio",45],["Cuetara",60],["El Cedral",45],["El Fraile 1 y 2",45],["El Polvo 1 y 2",45],["Emmsa",70],["Empresa Alcali",80],["Encinos",65],["Frisa",95],["Hacienda del Fraile",35],["Hacienda del Sol",45],["Heroes de Capellania",50],["Heroes de Lincoln",70],["Infonavit los Nogales",50],["Johnson Control",80],["Joyas de la Corona",60],["Joyas del Carrizal",55],["La Cruz",50],["La Martinez",45],["La Morelos",45],["La Paez",55],["Las Haciendas",40],["Las Torres",40],["Las Villas",40],["Los Nogales San Blas",60],["Mercedes",120],["Miguel Hidalgo",55],["Minas",50],["Mirador de Garcia",45],["Mirador del Fraile",45],["Nemak",140],["Nuevo Amanecer",45],["Paseo de Capellania",45],["Paseo de Lincoln",65],["Paseo del Nogal",45],["Portal de la Sierra",65],["Praderas de Lincoln",60],["Privada las Villas",40],["Privadas de Lincoln",60],["Privadas de Oasis",55],["Privalia",40],["Punta Diamante",40],["Punta Esmeralda",45],["Real de Capellanias",40],["Real de San Felipe",60],["Real de San Joaquin",65],["Real de Villas",45],["Renacimiento",65],["Rincon del Fraile",55],["Riveras de Capellanias",50],["San Blas",60],["Sierra Real",35],["Sobrevilla",45],["Sta. Elena",55],["Sta. Julia",65],["Sta. Lucia",70],["Sta. Monica",60],["Sta. Sofia",65],["Torre Luna",55],["Urbi Villa",35],["Valle de San Felipe",60],["Valle de San Jose",40],["Valles del Mirador",45],["Villa Azul",60],["Villa los Nogales",45],["Villa Nova",60],["Vista Montaña",30],["Vitro Flex",90]];
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const colKey=s=>norm(s).replace(/\bsta\.?\s*/g,"santa ").replace(/\b1\s*y\s*2\b/g," ").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
@@ -179,8 +288,8 @@ async function leerClima(){
 function razonesDinamica(umbral){const r=[];const f=festivoHoy();if(f)r.push("día festivo ("+f+")");
   if(clima){if(clima.lluvia)r.push("lluvia");else if(clima.mojado)r.push("pavimento mojado");if(!isNaN(clima.temp)&&clima.temp<umbral)r.push("frío ("+Math.round(clima.temp)+"°C)");}
   return r;}
+
 const INGREDIENTES=["Peperoni","Hawaiana","Carnes frías","Mexicana","Italiana","Champiñones"];
-// menú por defecto; el link que comparte la pizzería trae los precios vigentes y su WhatsApp
 let cfg={w:"",h:"",o:30,pc:50,m:[["Peperoni",110,0,0,0,0],["Hawaiana",140,0,1,0,0],["Carnes frías",140,0,1,0,0],["Mexicana",140,0,1,0,0],["Champiñones",140,0,1,0,0],["Luna italiana",140,0,1,0,0],["Combinada",140,0,1,1,0],["Mixta",190,0,0,0,0],["Coca desechable 2.5 L",60,1,0,0,1]]};
 try{const hsh=location.hash.slice(1);if(hsh){const j=JSON.parse(decodeURIComponent(escape(atob(hsh.replace(/-/g,"+").replace(/_/g,"/")))));if(j&&typeof j==="object"){if(!Array.isArray(j.m))delete j.m;cfg=Object.assign(cfg,j);}}}catch(_){}
 const envios=(()=>{if(Array.isArray(cfg.e)&&cfg.e.length)return cfg.e;
@@ -190,76 +299,160 @@ const envios=(()=>{if(Array.isArray(cfg.e)&&cfg.e.length)return cfg.e;
   return [...mapa.values()].sort((a,b)=>a[0].localeCompare(b[0],"es"));})();
 const buscarColonia=n=>{const k=colKey(n);return k?envios.find(e=>colKey(e[0])===k)||null:null;};
 function detectarColonia(t){const x=" "+colKey(t)+" ";let best=null;envios.forEach(e=>{const k=colKey(e[0]);if(k.length>=4&&x.includes(" "+k+" ")&&(!best||k.length>colKey(best[0]).length))best=e;});return best;}
-function sugerir(q){const k=colKey(q);if(k.length<2)return[];const a=envios.filter(e=>colKey(e[0]).startsWith(k)),b=envios.filter(e=>!colKey(e[0]).startsWith(k)&&colKey(e[0]).includes(k));return a.concat(b).slice(0,6);}
-let colSel=null,colOtra=false;
+function sugerirCol(q){const k=colKey(q);if(k.length<2)return[];const a=envios.filter(e=>colKey(e[0]).startsWith(k)),b=envios.filter(e=>!colKey(e[0]).startsWith(k)&&colKey(e[0]).includes(k));return a.concat(b).slice(0,6);}
+
+// ---------- productos ----------
+function tipoDe(n){const x=norm(n);return /coca|refresco|agua|bebida|soda/.test(x)?"soda":/pepe/.test(x)?"pep":/hawai/.test(x)?"haw":/carne/.test(x)?"car":/mexica/.test(x)?"mex":/champi/.test(x)?"cha":/italia/.test(x)?"ita":/combin/.test(x)?"com":/mixt/.test(x)?"mix":"gen";}
+const DESC={pep:"Peperoni dorado y mucho queso",haw:"Jamón con piña, dulce y salada",car:"Para los de buen diente: carnes frías",mex:"Con el toque mexicano que pica rico",cha:"Champiñones y queso gratinado",ita:"La receta de la casa, al estilo italiano",com:"Dos sabores en una sola pizza",mix:"Un poco de todo, para compartir",soda:"Bien fría, para acompañar",gen:"Hecha al momento"};
+const FAV=(Array.isArray(cfg.f)?cfg.f:[]).map(norm);
+const prods=cfg.m.map((x,i)=>{const n=String(x[0]);return{id:"p"+i,nombre:n,precio:Number(x[1])||0,bebida:!!x[2],esp:!!x[3],comb:!!x[4],coca:!!x[5],tipo:tipoDe(n),fav:FAV.includes(norm(n))};});
+const P=id=>prods.find(p=>p.id===id);
+const cocaP=prods.find(p=>p.coca);
+const PREPAGO=Number(cfg.pp)===1;
+const PAGO={k:String(cfg.pk||"722969010071057611"),b:cfg.pb||"Mercado Pago",t:cfg.pt||"Mónica Luna"};
+const W=String(cfg.w||"").replace(/\D/g,"");
+const ENLINEA=!!(cfg.t&&cfg.k&&window.crypto&&crypto.subtle&&window.fetch);
+
+// ---------- ilustraciones ----------
+function puntos(n,r,seed){const a=[];for(let i=0;i<n;i++){const ang=i*2.39996+seed,rad=r*Math.sqrt((i+.5)/n);a.push([50+rad*Math.cos(ang),50+rad*Math.sin(ang),ang]);}return a;}
+const T={
+  pep:(n,s)=>puntos(n,30,s).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6" fill="#b8261c"/><circle cx="${x-1.5}" cy="${y-1.5}" r="2" fill="#d9483a"/>`).join(""),
+  ham:(n,s)=>puntos(n,30,s).map(([x,y,a])=>`<rect x="${x-4}" y="${y-4}" width="8" height="8" rx="1.5" fill="#f2a3a3" transform="rotate(${a*57%90} ${x} ${y})"/>`).join(""),
+  pina:(n,s)=>puntos(n,28,s).map(([x,y])=>`<path d="M${x-3.5} ${y+3}L${x} ${y-4}L${x+3.5} ${y+3}Z" fill="#ffe066"/>`).join(""),
+  salami:(n,s)=>puntos(n,30,s).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#8f2a2a"/><circle cx="${x+1}" cy="${y}" r="1" fill="#e9b0a0"/>`).join(""),
+  jala:(n,s)=>puntos(n,29,s).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4" fill="none" stroke="#3c9a3c" stroke-width="2.4"/>`).join(""),
+  cebolla:(n,s)=>puntos(n,27,s).map(([x,y])=>`<path d="M${x-4} ${y}a4 4 0 0 1 8 0" fill="none" stroke="#fff4e0" stroke-width="1.6"/>`).join(""),
+  champi:(n,s)=>puntos(n,29,s).map(([x,y])=>`<path d="M${x-5} ${y}a5 4.2 0 0 1 10 0Z" fill="#efe1c8" stroke="#a88a6a" stroke-width=".8"/><rect x="${x-1.6}" y="${y}" width="3.2" height="4" fill="#e3d2b4"/>`).join(""),
+  albahaca:(n,s)=>puntos(n,28,s).map(([x,y,a])=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="2.6" fill="#3a8a3a" transform="rotate(${a*57} ${x} ${y})"/>`).join(""),
+  tomate:(n,s)=>puntos(n,30,s).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4.6" fill="#d63a2a"/><circle cx="${x}" cy="${y}" r="2.2" fill="#f07a5a"/>`).join("")
+};
+function pizzaSVG(tipo){
+  let top="";
+  if(tipo==="pep")top=T.pep(10,.3);
+  else if(tipo==="haw")top=T.ham(7,.2)+T.pina(8,1.4);
+  else if(tipo==="car")top=T.ham(5,.4)+T.salami(5,1.7)+T.pep(4,3);
+  else if(tipo==="mex")top=T.salami(6,.5)+T.jala(6,1.9)+T.cebolla(5,3.1);
+  else if(tipo==="cha")top=T.champi(9,.6);
+  else if(tipo==="ita")top=T.tomate(6,.4)+T.albahaca(7,1.6);
+  else if(tipo==="mix")top=T.pep(4,.2)+T.champi(4,1.3)+T.jala(3,2.2)+T.ham(3,3.3)+T.pina(3,4.4);
+  else if(tipo==="com")top=`<g clip-path="url(#izq)">${T.pep(10,.3)}</g><g clip-path="url(#der)">${T.champi(9,1)}</g><line x1="50" y1="12" x2="50" y2="88" stroke="rgba(0,0,0,.18)" stroke-width="1.2"/>`;
+  else top=T.pep(5,.3);
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="q${tipo}" cx="45%" cy="40%"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f0b84a"/></radialGradient><clipPath id="izq"><rect x="0" y="0" width="50" height="100"/></clipPath><clipPath id="der"><rect x="50" y="0" width="50" height="100"/></clipPath></defs>
+  <circle cx="50" cy="50" r="47" fill="#c8843e"/><circle cx="50" cy="50" r="43" fill="#e4a55a"/><circle cx="50" cy="50" r="39" fill="#c8442b"/><circle cx="50" cy="50" r="37" fill="url(#q${tipo})"/>
+  ${top}<g stroke="rgba(90,40,10,.18)" stroke-width="1"><line x1="50" y1="6" x2="50" y2="94"/><line x1="12" y1="28" x2="88" y2="72"/><line x1="12" y1="72" x2="88" y2="28"/></g></svg>`;
+}
+const sodaSVG=`<svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="vid" x1="0" x2="1"><stop offset="0" stop-color="#2a120a"/><stop offset=".45" stop-color="#5a2a18"/><stop offset="1" stop-color="#1e0c06"/></linearGradient></defs>
+  <rect x="42" y="6" width="16" height="8" rx="2" fill="#b97a1e"/><path d="M43 14h14v10c0 4 8 8 8 16v48a6 6 0 0 1-6 6H41a6 6 0 0 1-6-6V40c0-8 8-12 8-16Z" fill="url(#vid)"/>
+  <rect x="35" y="50" width="30" height="16" rx="1" fill="#e9b44c"/><text x="50" y="61.5" text-anchor="middle" font-size="7.5" font-weight="900" font-family="sans-serif" fill="#2a120a">2.5 L</text>
+  <path d="M40 30c-2 4-3 8-3 14" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const artDe=p=>p.tipo==="soda"?sodaSVG:pizzaSVG(p.tipo);
+
+// ---------- estado ----------
+let lines=LS.get("pl-carrito")||[];lines=Array.isArray(lines)?lines.filter(l=>P(l.pid)):[];
+let tipo="Domicilio",pago=PREPAGO?"Transferencia":"Efectivo",colSel=null,colOtra=false;
+const guardarCarrito=()=>LS.set("pl-carrito",lines);
+const cantDe=pid=>lines.filter(l=>l.pid===pid).reduce((s,l)=>s+l.cant,0);
+const nombreL=l=>P(l.pid).nombre+(l.ing&&l.ing.length?" ("+l.ing.join(" + ")+")":"");
+
+// ---------- dinámica ----------
 const DINA_MONTO=Number(cfg.dm)||10,DINA_TEMP=Number(cfg.dt)||10,DINA_AUTO=cfg.da!==0;
 function dinaRaz(){return DINA_AUTO?razonesDinamica(DINA_TEMP):[];}
 function dinaExtra(){return tipo==="Domicilio"&&colSel&&dinaRaz().length?DINA_MONTO:0;}
 function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]+dinaExtra():0;}
-function renderDina(){const r=dinaRaz();const el=$("dina");el.hidden=!r.length;
-  if(r.length)el.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(DINA_MONTO)+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. Tu pedido puede tardar un poquito más. ¡Gracias por tu comprensión! 💛';}
-(async()=>{try{await leerClima();}catch(_){}renderDina();renderEnvio();render();})();
+function calc(){let sub=0,esp=0,cocas=0;
+  lines.forEach(l=>{const p=P(l.pid);sub+=(p.precio+(l.orilla?Number(cfg.o):0))*l.cant;if(p.esp)esp+=l.cant;if(p.coca)cocas+=l.cant;});
+  const n=Math.min(esp,cocas),desc=cocaP&&n&&cocaP.precio>cfg.pc?n*(cocaP.precio-cfg.pc):0,env=envioActual();
+  return{sub,desc,env,esp,cocas,total:sub-desc+env,cnt:lines.reduce((s,l)=>s+l.cant,0)};}
+
+// ---------- pintar ----------
+function renderTop(){
+  const r=dinaRaz(),ch=[];
+  if(cfg.h)ch.push('<span class="chip">🕒 '+esc(cfg.h)+'</span>');
+  ch.push('<span class="chip">⏱️ Entrega aprox. '+(r.length?"45–60":"40–55")+' min</span>');
+  if(PREPAGO)ch.push('<span class="chip">💳 Pago por transferencia</span>');
+  if(r.length)ch.push('<span class="chip sky">🛵 Dinámica de reparto hoy</span>');
+  $("chips").innerHTML=ch.join("");
+  $("promo").innerHTML=cocaP&&cfg.pc<cocaP.precio?'<span class="big">🍕🥤</span><span><b>Promo de la casa</b><small>Cualquier pizza de especialidad + '+esc(cocaP.nombre)+' por solo '+money(cfg.pc)+' más</small></span>':'<span class="big">🌙</span><span><b>Hecha al momento</b><small>Elige tus pizzas y te las llevamos calientitas</small></span>';
+  const d=$("dina");d.hidden=!r.length;
+  if(r.length)d.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(DINA_MONTO)+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. ¡Gracias por tu comprensión! 💛';
+}
+function renderProds(){
+  const fila=p=>{const c=cantDe(p.id),mis=lines.filter(l=>l.pid===p.id);
+    return '<article class="item'+(c?' en':'')+'" id="it-'+p.id+'"><div class="art">'+artDe(p)+'</div><div>'+
+      (p.fav?'<span class="badge fire">🔥 La favorita</span>':'')+(p.comb?'<span class="badge">Elige 2</span>':p.esp?'<span class="badge">Especialidad</span>':'')+
+      '<div class="n">'+esc(p.nombre)+'</div><div class="d">'+esc(p.comb?"Elige 2: "+INGREDIENTES.join(", "):DESC[p.tipo])+'</div>'+
+      '<div class="row"><span class="p gold-text num">'+money(p.precio)+'</span><span class="qty">'+(c?'<button type="button" data-menos="'+p.id+'" aria-label="Quitar '+esc(p.nombre)+'">−</button><span class="num" id="q-'+p.id+'">'+c+'</span>':'')+'<button type="button" class="add" data-mas="'+p.id+'" aria-label="Agregar '+esc(p.nombre)+'">+</button></span></div></div>'+
+      mis.map((l,k)=>{const idx=lines.indexOf(l);let h='';
+        if(p.comb)h+='<div class="extra">'+(mis.length>1?'<small>Pizza '+(k+1)+'</small>':'<small>Elige tus 2 sabores:</small>')+INGREDIENTES.map(i=>'<button type="button" class="tog" data-ing="'+idx+'" data-i="'+esc(i)+'" aria-pressed="'+l.ing.includes(i)+'">'+esc(i)+'</button>').join("")+'</div>';
+        if(!p.bebida)h+='<div class="extra"><button type="button" class="tog" data-or="'+idx+'" aria-pressed="'+l.orilla+'">'+(l.orilla?'✓ ':'🧀 ')+'Orilla rellena +'+money(cfg.o)+(l.cant>1?' (las '+l.cant+')':'')+'</button></div>';
+        return h;}).join("")+'</article>';};
+  $("pizzas").innerHTML=prods.filter(p=>!p.bebida).map(fila).join("");
+  $("bebidas").innerHTML=prods.filter(p=>p.bebida).map(fila).join("");
+}
+function renderCart(){
+  const r=calc();
+  $("lines").innerHTML=lines.length?lines.map(l=>{const p=P(l.pid);return '<div><span>'+l.cant+' × '+esc(nombreL(l))+(l.orilla?' + orilla':'')+'</span><span class="num">'+money((p.precio+(l.orilla?cfg.o:0))*l.cant)+'</span></div>';}).join("")+
+    (r.desc?'<div class="disc"><span>🎉 Promo Coca</span><span class="num">−'+money(r.desc)+'</span></div>':'')+
+    (r.env?'<div><span>Envío a '+esc(colSel[0])+'</span><span class="num">'+money(colSel[1])+'</span></div>'+(dinaExtra()?'<div class="dn"><span>Dinámica de reparto</span><span class="num">+'+money(dinaExtra())+'</span></div>':''):(tipo==="Domicilio"&&colOtra?'<div><span>Envío</span><span>por confirmar</span></div>':''))+
+    '<div class="tot"><span>Total</span><span class="num gold-text">'+money(r.total)+'</span></div>':'<p style="color:var(--muted);margin:4px 0">Tu pedido está vacío. Toca <b>+</b> en tus pizzas favoritas 🍕</p>';
+  let s="";
+  if(cocaP&&r.esp>r.cocas&&cfg.pc<cocaP.precio)s='<div class="sugiere"><span>🥤</span><span class="tx"><b>¡Completa tu promo!</b> Agrega '+esc(cocaP.nombre)+' por solo '+money(cfg.pc)+' <s style="opacity:.6">'+money(cocaP.precio)+'</s></span><button type="button" data-mas="'+cocaP.id+'">Agregar</button></div>';
+  else{const sinOr=lines.find(l=>!P(l.pid).bebida&&!l.orilla);if(sinOr)s='<div class="sugiere"><span>🧀</span><span class="tx"><b>¿Con orilla rellena?</b> Tu '+esc(P(sinOr.pid).nombre)+' queda irresistible por +'+money(cfg.o)+'</span><button type="button" data-or="'+lines.indexOf(sinOr)+'">Sí, agregar</button></div>';}
+  $("sugiere").innerHTML=lines.length?s:"";
+  renderBar();
+}
+let datosVisibles=false;
+function renderBar(){
+  const r=calc();$("barCnt").textContent=r.cnt;$("barTot").textContent=money(r.total);
+  $("enviar").disabled=!lines.length;
+  $("barTxt").textContent=!lines.length?"Elige tus pizzas":datosVisibles?(ENLINEA?"Enviar mi pedido":"Pedir por WhatsApp"):"Continuar";
+}
+function render(){renderProds();renderCart();guardarCarrito();}
+function animar(pid){const q=$("q-"+pid);if(q){q.classList.remove("pop");void q.offsetWidth;q.classList.add("pop");}
+  const b=$("enviar");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump");if(navigator.vibrate){try{navigator.vibrate(12);}catch(_){}}}
+
+// ---------- interacción con productos ----------
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b||b.closest("#pantalla"))return;
+  if(b.dataset.mas){const p=P(b.dataset.mas);if(!p)return;
+    if(p.comb)lines.push({pid:p.id,orilla:false,ing:[],cant:1});
+    else{const l=lines.find(x=>x.pid===p.id&&!x.orilla);if(l)l.cant++;else lines.push({pid:p.id,orilla:false,ing:[],cant:1});}
+    render();animar(p.id);if(p.comb)toast("Elige los 2 sabores de tu combinada 👇");}
+  else if(b.dataset.menos){const ls=lines.filter(x=>x.pid===b.dataset.menos);const l=ls[ls.length-1];if(l){l.cant--;if(l.cant<=0)lines.splice(lines.indexOf(l),1);}render();}
+  else if(b.dataset.or){const l=lines[Number(b.dataset.or)];if(!l)return;l.orilla=!l.orilla;
+    const twin=lines.find(x=>x!==l&&x.pid===l.pid&&x.orilla===l.orilla&&x.ing.join()===l.ing.join()&&!P(l.pid).comb);if(twin){twin.cant+=l.cant;lines.splice(lines.indexOf(l),1);}render();if(l.orilla)toast("🧀 ¡Con orilla rellena!");}
+  else if(b.dataset.ing){const l=lines[Number(b.dataset.ing)];const i=b.dataset.i;
+    if(l.ing.includes(i))l.ing=l.ing.filter(x=>x!==i);else{if(l.ing.length>=2)l.ing.shift();l.ing.push(i);}render();}
+});
+
+// ---------- datos del cliente ----------
+function seg(id,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b)return;$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));cb(b.dataset.v);});}
+seg("segTipo",v=>{tipo=v;$("dirWrap").hidden=v!=="Domicilio";renderEnvio();renderCart();});
+seg("segPago",v=>{pago=v;$("conWrap").hidden=v!=="Efectivo";});
+if(PREPAGO){$("pagoSel").hidden=true;$("pagoInfo").hidden=false;
+  $("pagoInfo").innerHTML='💳 <b>Pago por transferencia antes de preparar.</b> Al enviar tu pedido te damos la cuenta, transfieres y nos mandas tu comprobante. ¡Así tu pizza entra al horno al instante!';}
 function renderEnvio(){const el=$("envInfo");
   if(tipo!=="Domicilio"||(!colSel&&!colOtra)){el.hidden=true;return;}
   el.hidden=false;el.className="envio"+(colSel?"":" pend");
   el.innerHTML=colSel?'<span>🛵 Envío a '+esc(colSel[0])+(dinaExtra()?' (incluye dinámica)':'')+'</span><span class="num">'+money(envioActual())+'</span>':'<span>🛵 Envío a tu colonia</span><span>Te confirmamos el costo</span>';}
-function elegirColonia(e,otra,escribiendo){colSel=e;colOtra=!!otra;if(e&&!escribiendo)$("col").value=e[0];$("colSug").innerHTML="";renderEnvio();render();}
+function elegirColonia(e,otra,escribiendo){colSel=e;colOtra=!!otra;if(e&&!escribiendo)$("col").value=e[0];$("colSug").innerHTML="";renderEnvio();renderCart();guardarCli();}
 $("col").addEventListener("input",()=>{const q=$("col").value;const ex=buscarColonia(q);colOtra=false;
-  if(ex){elegirColonia(ex,false,true);return;}colSel=null;renderEnvio();render();
-  const s=sugerir(q);$("colSug").innerHTML=s.map(e=>'<button type="button" data-col="'+esc(e[0])+'"><span>'+esc(e[0])+'</span><small class="num">envío '+money(e[1])+'</small></button>').join("")+
+  if(ex){elegirColonia(ex,false,true);return;}colSel=null;renderEnvio();renderCart();
+  $("colSug").innerHTML=sugerirCol(q).map(e=>'<button type="button" data-col="'+esc(e[0])+'"><span>'+esc(e[0])+'</span><small class="num">envío '+money(e[1])+'</small></button>').join("")+
     (colKey(q).length>=3?'<button type="button" class="otra" data-otra="1">Mi colonia no aparece en la lista</button>':'');});
 $("colSug").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.col)elegirColonia(buscarColonia(b.dataset.col));else if(b.dataset.otra)elegirColonia(null,true);});
 $("dir").addEventListener("input",()=>{if(!colSel){const d=detectarColonia($("dir").value);if(d)elegirColonia(d);}});
-const prods=cfg.m.map((x,i)=>({id:"p"+i,nombre:String(x[0]),precio:Number(x[1])||0,bebida:!!x[2],esp:!!x[3],comb:!!x[4],coca:!!x[5]}));
-if(cfg.h){$("horario").textContent=cfg.h;$("horario").hidden=false;}
-const cocaP=prods.find(p=>p.coca);
-$("promo").innerHTML=cocaP&&cfg.pc<cocaP.precio?'<b>Promo de la casa</b>Pizza de especialidad + '+esc(cocaP.nombre)+' por solo '+money(cfg.pc)+' más':'<b>Hecha al momento</b>Elige tus pizzas y te las llevamos calientitas';
-// estado: líneas {pid, orilla, ing:[], cant}
-let lines=[];let tipo="Domicilio",pago="Efectivo";
-const cantDe=pid=>lines.filter(l=>l.pid===pid).reduce((s,l)=>s+l.cant,0);
-function renderProds(){
-  const fila=p=>{const c=cantDe(p.id);const mis=lines.filter(l=>l.pid===p.id);
-    return '<div class="item"><div class="n">'+esc(p.nombre)+(p.comb?'<span class="tag">Elige 2</span>':p.esp?'<span class="tag">Especialidad</span>':'')+
-      (p.comb?'<small>'+INGREDIENTES.join(", ")+'</small>':'')+'</div>'+
-      '<div class="qty">'+(c?'<button type="button" data-menos="'+p.id+'" aria-label="Quitar '+esc(p.nombre)+'">−</button><span class="num">'+c+'</span>':'<span class="p gold-text num">'+money(p.precio)+'</span>')+'<button type="button" class="add" data-mas="'+p.id+'" aria-label="Agregar '+esc(p.nombre)+'">+</button></div>'+
-      mis.map((l,k)=>{const idx=lines.indexOf(l);let h='';
-        if(p.comb)h+='<div class="extra">'+(mis.length>1?'<small style="width:100%;color:var(--muted)">Pizza '+(k+1)+'</small>':'')+INGREDIENTES.map(i=>'<button type="button" class="chip" data-ing="'+idx+'" data-i="'+esc(i)+'" aria-pressed="'+l.ing.includes(i)+'">'+esc(i)+'</button>').join("")+'</div>';
-        if(!p.bebida)h+='<div class="extra"><button type="button" class="chip" data-or="'+idx+'" aria-pressed="'+l.orilla+'">'+(l.orilla?'✓ ':'+ ')+'Orilla rellena '+money(cfg.o)+(l.cant>1?' (las '+l.cant+')':'')+'</button></div>';
-        return h;}).join("")+'</div>';};
-  $("pizzas").innerHTML=prods.filter(p=>!p.bebida).map(fila).join("");
-  $("bebidas").innerHTML=prods.filter(p=>p.bebida).map(fila).join("");
-}
-function calc(){
-  const P=id=>prods.find(p=>p.id===id);
-  let sub=0,esp=0,cocas=0;const env=envioActual();lines.forEach(l=>{const p=P(l.pid);sub+=(p.precio+(l.orilla?cfg.o:0))*l.cant;if(p.esp)esp+=l.cant;if(p.coca)cocas+=l.cant;});
-  const n=Math.min(esp,cocas);const desc=cocaP&&n&&cocaP.precio>cfg.pc?n*(cocaP.precio-cfg.pc):0;
-  return{sub,desc,n,env,total:sub-desc+env};
-}
-function nombreL(l){const p=prods.find(x=>x.id===l.pid);return p.nombre+(l.ing.length?" ("+l.ing.join(" + ")+")":"");}
-function render(){
-  renderProds();const r=calc();
-  $("lines").innerHTML=lines.length?lines.map(l=>{const p=prods.find(x=>x.id===l.pid);return '<div><span>'+l.cant+' × '+esc(nombreL(l))+(l.orilla?' + orilla':'')+'</span><span class="num">'+money((p.precio+(l.orilla?cfg.o:0))*l.cant)+'</span></div>';}).join("")+
-    (r.desc?'<div class="disc"><span>Promo Coca</span><span class="num">−'+money(r.desc)+'</span></div>':'')+
-    (r.env?'<div><span>Envío a '+esc(colSel[0])+'</span><span class="num">'+money(colSel[1])+'</span></div>'+(dinaExtra()?'<div style="color:#8cc8ff"><span>Dinámica de reparto</span><span class="num">+'+money(dinaExtra())+'</span></div>':''):(tipo==="Domicilio"&&colOtra?'<div><span>Envío</span><span>por confirmar</span></div>':''))+'<div class="tot"><span>Total</span><span class="num gold-text">'+money(r.total)+'</span></div>':'<p class="hint">Agrega tus pizzas con el botón +</p>';
-  $("barTot").textContent=money(r.total);$("enviar").disabled=!lines.length;
-}
-document.addEventListener("click",e=>{
-  const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.mas){const p=prods.find(x=>x.id===b.dataset.mas);
-    if(p.comb){lines.push({pid:p.id,orilla:false,ing:[],cant:1});}
-    else{const l=lines.find(x=>x.pid===p.id&&!x.orilla);if(l)l.cant++;else lines.push({pid:p.id,orilla:false,ing:[],cant:1});}
-    render();}
-  else if(b.dataset.menos){const ls=lines.filter(x=>x.pid===b.dataset.menos);const l=ls[ls.length-1];if(l){l.cant--;if(l.cant<=0)lines.splice(lines.indexOf(l),1);}render();}
-  else if(b.dataset.or){const l=lines[Number(b.dataset.or)];l.orilla=!l.orilla;
-    const twin=lines.find(x=>x!==l&&x.pid===l.pid&&x.orilla===l.orilla&&x.ing.join()===l.ing.join()&&!prods.find(p=>p.id===l.pid).comb);if(twin){twin.cant+=l.cant;lines.splice(lines.indexOf(l),1);}render();}
-  else if(b.dataset.ing){const l=lines[Number(b.dataset.ing)];const i=b.dataset.i;
-    if(l.ing.includes(i))l.ing=l.ing.filter(x=>x!==i);else{if(l.ing.length>=2)l.ing.shift();l.ing.push(i);}render();}
-});
-function seg(id,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b)return;$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));cb(b.dataset.v);});}
-seg("segTipo",v=>{tipo=v;$("dirWrap").hidden=v!=="Domicilio";renderEnvio();render();});
-seg("segPago",v=>{pago=v;$("conWrap").hidden=v!=="Efectivo";});
-const enLinea=!!(cfg.t&&cfg.k&&window.crypto&&crypto.subtle&&window.fetch);
-if(enLinea){$("enviar").classList.add("online");$("barTxt").textContent="Enviar mi pedido";$("porWa").hidden=!cfg.w;}
+function guardarCli(){LS.set("pl-cliente",{nom:$("nom").value,tel:$("tel").value,dir:$("dir").value,ref:$("ref").value,col:$("col").value});}
+document.addEventListener("input",e=>{if(["nom","tel","dir","ref","col"].includes(e.target.id))guardarCli();});
+{const g=LS.get("pl-cliente");if(g){["nom","tel","dir","ref","col"].forEach(k=>{if(g[k])$(k).value=g[k];});if(g.col){const c=buscarColonia(g.col);if(c)colSel=c;else colOtra=true;}}}
+$("porWa").hidden=!ENLINEA||!W;
+
+// ---------- barra: continuar / enviar ----------
+if("IntersectionObserver" in window){new IntersectionObserver(es=>{datosVisibles=es.some(x=>x.isIntersecting);renderBar();},{threshold:.25}).observe($("datos"));}else datosVisibles=true;
+$("enviar").addEventListener("click",()=>{if(!datosVisibles){$("sec-pedido").scrollIntoView({behavior:"smooth"});setTimeout(()=>{datosVisibles=true;renderBar();},700);return;}enviarPedido(false);});
+$("porWa").addEventListener("click",()=>enviarPedido(true));
+
+// ---------- envío del pedido ----------
 const b64u=buf=>{let s="";new Uint8Array(buf).forEach(x=>s+=String.fromCharCode(x));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");};
 const ub64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)),c=>c.charCodeAt(0));
 async function cifrar(obj){
@@ -270,50 +463,99 @@ async function cifrar(obj){
   const c=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(obj)));
   return JSON.stringify({e:b64u(await crypto.subtle.exportKey("raw",eph.publicKey)),iv:b64u(iv),c:b64u(c)});
 }
+const rnd=n=>Array.from(crypto.getRandomValues(new Uint8Array(n)),x=>"abcdefghijkmnpqrstuvwxyz23456789"[x%32]).join("");
 let enviando=false;
-$("porWa").addEventListener("click",()=>enviarPedido(true));
-$("doneOk").addEventListener("click",()=>{$("done").hidden=true;});
-$("enviar").addEventListener("click",()=>enviarPedido(false));
+function abrirEnlace(url){const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();}
 async function enviarPedido(forzarWa){
-  if(enviando)return;
-  const err=$("err");err.textContent="";
-  const falta=lines.find(l=>prods.find(p=>p.id===l.pid).comb&&l.ing.length!==2);
-  if(falta){err.textContent="Elige 2 ingredientes para tu pizza combinada.";document.querySelector('[data-ing="'+lines.indexOf(falta)+'"]').scrollIntoView({behavior:"smooth",block:"center"});return;}
+  if(enviando)return;const err=$("err");err.textContent="";
+  const falta=lines.find(l=>P(l.pid).comb&&l.ing.length!==2);
+  if(falta){err.textContent="Elige los 2 sabores de tu pizza combinada.";const t=document.querySelector('[data-ing="'+lines.indexOf(falta)+'"]');if(t)t.scrollIntoView({behavior:"smooth",block:"center"});return;}
   if(!$("nom").value.trim()){err.textContent="Escribe tu nombre.";$("nom").focus();return;}
   const tel=$("tel").value.replace(/\D/g,"").slice(-10);
-  if(tel.length!==10){err.textContent="Escribe tu teléfono a 10 dígitos.";$("tel").focus();return;}
+  if(tel.length!==10){err.textContent="Escribe tu WhatsApp a 10 dígitos.";$("tel").focus();return;}
   if(tipo==="Domicilio"&&!colSel&&!colOtra){err.textContent="Escribe tu colonia y elígela de la lista.";$("col").focus();return;}
-  if(tipo==="Domicilio"&&$("dir").value.trim().length<3){err.textContent="Escribe tu dirección para llevarte tu pedido.";$("dir").focus();return;}
-  const r=calc();const con=parseFloat($("con").value);
+  if(tipo==="Domicilio"&&$("dir").value.trim().length<3){err.textContent="Escribe tu calle y número.";$("dir").focus();return;}
+  const r=calc(),con=parseFloat($("con").value),oid=rnd(10),refc="PL-"+(1000+Math.floor(Math.random()*9000));
+  const pagoTxt=PREPAGO?"Transferencia (pago antes de que lo preparen)":pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"");
   const txt="🌙 *Pedido para Pizzas Luna*\n\n"+lines.map(l=>l.cant+" "+nombreL(l)+(l.orilla?" con orilla":"")).join("\n")+
     "\n\n*Total: "+money(r.total)+"*"+(r.desc?" (con promo)":"")+"\n\nNombre: "+$("nom").value.trim()+"\nTel: "+tel+
     (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+"\nColonia: "+$("col").value.trim()+(colSel?"\nEnvío: "+money(envioActual())+(dinaExtra()?" (incluye "+money(dinaExtra())+" de dinámica)":""):"\nEnvío: por confirmar")+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
-    "\nPago: "+pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"")+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
-  const w=String(cfg.w||"").replace(/\D/g,"");
-  const porWhats=()=>{const url="https://wa.me/"+(w.length===10?"52"+w:w)+"?text="+encodeURIComponent(txt);
-    const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();};
-  if(!enLinea||forzarWa){porWhats();return;}
-  const pedido={v:1,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",col:tipo==="Domicilio"?$("col").value.trim():"",env:envioActual(),ref:tipo==="Domicilio"?$("ref").value.trim():"",
-    pago,con:pago==="Efectivo"&&!isNaN(con)?con:"",nota:$("nota").value.trim(),total:r.total,hora:new Date().toISOString(),
-    items:lines.map(l=>({n:prods.find(p=>p.id===l.pid).nombre,c:l.cant,o:l.orilla?1:0,i:l.ing}))};
-  enviando=true;const btn=$("enviar");btn.disabled=true;$("barTxt").textContent="Enviando…";
+    "\nPago: "+pagoTxt+"\nRef: "+refc+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
+  const resumen=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+(r.env?"\nEnvío a "+colSel[0]+": "+money(r.env):"");
+  const ult={items:lines.map(l=>({n:P(l.pid).nombre,c:l.cant,o:l.orilla?1:0,i:l.ing})),resumen:lines.map(l=>l.cant+" "+nombreL(l)).join(", "),fecha:Date.now()};
+  const activo={oid,refc,seg:null,total:r.total,hora:Date.now(),pre:PREPAGO,tipo,resumen,nombre:$("nom").value.trim(),estado:"recibido",eta:"",porWa:false};
+  if(!ENLINEA||forzarWa){
+    abrirEnlace("https://wa.me/"+(W.length===10?"52"+W:W)+"?text="+encodeURIComponent(txt));
+    activo.porWa=true;terminar(activo,ult);return;}
+  const pedido={v:2,oid,refc,pre:PREPAGO?1:0,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",ref:tipo==="Domicilio"?$("ref").value.trim():"",
+    col:tipo==="Domicilio"?$("col").value.trim():"",env:envioActual(),pago:PREPAGO?"Transferencia":pago,con:!PREPAGO&&pago==="Efectivo"&&!isNaN(con)?con:"",nota:$("nota").value.trim(),total:r.total,hora:new Date().toISOString(),
+    items:ult.items};
+  enviando=true;$("enviar").disabled=true;$("barTxt").textContent="Enviando…";
   try{
     const body=await cifrar(pedido);
     const resp=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:cfg.t,message:body,title:"🍕 Nuevo pedido en línea",tags:["pizza"],priority:4})});
     if(!resp.ok)throw new Error("HTTP "+resp.status);
-    $("doneRes").textContent=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+(r.env?"\nEnvío a "+colSel[0]+": "+money(r.env)+(dinaExtra()?" (con dinámica)":""):"")+"\n\nTotal: "+money(r.total)+(tipo==="Domicilio"&&colOtra?" + envío":"");
-    $("doneTxt").textContent=tipo==="Domicilio"?"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp con la hora de entrega.":"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp a qué hora pasar por él.";
-    $("done").hidden=false;lines=[];render();
-  }catch(e){
-    err.textContent="No se pudo enviar por internet."+(w?" Toca “Prefiero mandarlo por WhatsApp”.":" Revisa tu conexión e intenta de nuevo.");
-    $("porWa").hidden=!w;
-  }finally{enviando=false;$("barTxt").textContent="Enviar mi pedido";render();}
+    activo.seg=cfg.t+"-"+oid;terminar(activo,ult);
+  }catch(e){err.textContent="No se pudo enviar por internet."+(W?" Toca “Prefiero mandarlo por WhatsApp”.":" Revisa tu conexión e intenta de nuevo.");$("porWa").hidden=!W;}
+  finally{enviando=false;renderBar();}
 }
-try{const g=JSON.parse(localStorage.getItem("pl-cliente")||"null");if(g){["nom","tel","dir","ref","col"].forEach(k=>{if(g[k])$(k).value=g[k];});if(g.col){const c=buscarColonia(g.col);if(c){colSel=c;}else colOtra=true;renderEnvio();}}}catch(_){}
-document.addEventListener("input",e=>{if(["nom","tel","dir","ref","col"].includes(e.target.id)){guardarCli();}});
-function guardarCli(){try{localStorage.setItem("pl-cliente",JSON.stringify({nom:$("nom").value,tel:$("tel").value,dir:$("dir").value,ref:$("ref").value,col:$("col").value}));}catch(_){}}
-$("colSug").addEventListener("click",()=>setTimeout(guardarCli,0));
-render();
+function terminar(activo,ult){
+  LS.set("pl-activo",activo);LS.set("pl-ultimo",ult);
+  lines=[];render();abrirPantalla();
+}
+
+// ---------- pantalla de pago y seguimiento ----------
+const PASOS=[["recibido","📩","Pedido recibido","Ya lo tenemos"],["pagado","💳","Pago confirmado","Recibimos tu comprobante"],["preparando","🔥","En el horno","Preparando tu pizza"],["camino","🛵","En camino","Tu repartidor va para allá"],["entregado","🍕","¡Entregado!","Buen provecho"]];
+let poll=null;
+function pasosDe(a){let p=PASOS.slice();if(!a.pre)p=p.filter(x=>x[0]!=="pagado");if(a.tipo!=="Domicilio")p=p.map(x=>x[0]==="camino"?["camino","🏃","Lista para recoger","Ya puedes pasar por ella"]:x);return p;}
+function idxEstado(a){const e=a.estado==="listo"?"camino":a.estado;const p=pasosDe(a).map(x=>x[0]);const i=p.indexOf(e);return i<0?0:i;}
+function renderPantalla(){
+  const a=LS.get("pl-activo");if(!a){$("pantalla").hidden=true;return;}
+  const mal=a.estado==="rechazado"||a.estado==="cancelado";const esperaPago=a.pre&&a.estado==="recibido";
+  $("pTit").textContent=mal?"Lo sentimos 😔":esperaPago?"¡Ya casi! Solo falta tu pago":a.estado==="entregado"?"¡Buen provecho! 🍕":"¡Tu pedido va en marcha!";
+  $("pSub").textContent=mal?"No pudimos tomar tu pedido en este momento. Escríbenos por WhatsApp y con gusto te ayudamos.":
+    esperaPago?"Tu pizza entra al horno en cuanto confirmemos tu pago.":a.porWa&&!a.seg?"Te confirmamos por WhatsApp.":a.eta?"Hora aproximada: "+a.eta:"Aquí ves cómo va, se actualiza solo.";
+  $("pPago").hidden=!esperaPago;$("pPasos").hidden=!esperaPago||!W;
+  $("pMonto").textContent=money(a.total);$("pBanco").textContent=PAGO.b;$("pCuenta").textContent=PAGO.k.replace(/(\d{4})(?=\d)/g,"$1 ");$("pTitular").textContent=PAGO.t;$("pRef").textContent=a.refc;
+  $("pWa").href="https://wa.me/"+(W.length===10?"52"+W:W)+"?text="+encodeURIComponent("¡Hola! Soy "+a.nombre+". Ya pagué mi pedido "+a.refc+" por "+money(a.total)+". Te mando mi comprobante 👇");
+  const ps=pasosDe(a),cur=idxEstado(a);
+  $("track").innerHTML=mal?'<li class="now"><span class="pt">✖</span><span><b>Pedido no aceptado</b><small>Escríbenos por WhatsApp</small></span></li>':
+    ps.map((x,i)=>'<li class="'+(i<cur||a.estado==="entregado"?"ok":i===cur?"now":"off")+'"><span class="pt">'+(i<cur||a.estado==="entregado"?"✓":x[1])+'</span><span><b>'+x[2]+'</b><small>'+(i===cur&&x[0]==="preparando"&&a.eta?"Llega aprox. "+a.eta:x[3])+'</small></span></li>').join("");
+  $("pResumen").innerHTML='<b>Tu pedido · '+esc(a.refc)+'</b><div style="white-space:pre-line;color:var(--muted);margin-top:6px">'+esc(a.resumen)+'</div><div style="margin-top:8px;font-weight:900">Total: '+money(a.total)+'</div>';
+}
+function abrirPantalla(){$("pantalla").hidden=false;document.body.style.overflow="hidden";renderPantalla();revisarEstado();clearInterval(poll);poll=setInterval(()=>{if(!document.hidden)revisarEstado();},10000);window.scrollTo(0,0);}
+$("pCerrar").addEventListener("click",()=>{$("pantalla").hidden=true;document.body.style.overflow="";clearInterval(poll);renderEnCurso();});
+$("cpCuenta").addEventListener("click",()=>copiar(PAGO.k,"CLABE copiada ✓"));
+$("cpRef").addEventListener("click",()=>copiar($("pRef").textContent,"Concepto copiado ✓"));
+async function revisarEstado(){
+  const a=LS.get("pl-activo");if(!a||!a.seg)return;
+  try{const r=await fetch("https://ntfy.sh/"+a.seg+"/json?poll=1&since=all",{cache:"no-store"});if(!r.ok)return;
+    let ult=null;(await r.text()).split("\n").filter(Boolean).forEach(l=>{try{const m=JSON.parse(l);if(m.event!=="message")return;const d=JSON.parse(m.message);if(d&&d.e&&(!ult||(d.t||0)>=(ult.t||0)))ult=d;}catch(_){}});
+    if(ult){const antes=a.estado;a.estado=ult.e;if(ult.eta)a.eta=ult.eta;LS.set("pl-activo",a);
+      if(antes!==a.estado){if(navigator.vibrate){try{navigator.vibrate([120,60,120]);}catch(_){}}toast(({pagado:"💳 ¡Pago confirmado!",preparando:"🔥 ¡Tu pizza ya está en el horno!",camino:"🛵 ¡Tu pedido va en camino!",listo:"🏃 ¡Tu pedido está listo!",entregado:"🍕 ¡Buen provecho!"})[a.estado]||"Tu pedido se actualizó");}
+      renderPantalla();renderEnCurso();}
+  }catch(_){}
+}
+
+// ---------- pedido en curso / repetir ----------
+function renderEnCurso(){
+  let a=LS.get("pl-activo");
+  if(a&&(Date.now()-a.hora>10*36e5||((a.estado==="entregado"||a.estado==="rechazado"||a.estado==="cancelado")&&Date.now()-a.hora>2*36e5))){LS.del("pl-activo");a=null;}
+  $("enCurso").innerHTML=a?'<div class="repetir" style="border-style:solid"><span style="font-size:1.8rem">'+(a.estado==="camino"?"🛵":a.estado==="entregado"?"🍕":"🔥")+'</span><span class="tx"><b>Tu pedido '+esc(a.refc)+'</b>'+({recibido:a.pre?"Esperando tu pago":"Recibido",pagado:"Pago confirmado",preparando:"En el horno"+(a.eta?" · llega "+a.eta:""),camino:a.tipo==="Domicilio"?"¡Va en camino!":"¡Listo para recoger!",listo:"¡Listo para recoger!",entregado:"Entregado",rechazado:"No aceptado",cancelado:"Cancelado"})[a.estado]+'</span><button type="button" id="verPedido">Ver</button></div>':"";
+  if(a)$("verPedido").onclick=abrirPantalla;
+  const u=LS.get("pl-ultimo");
+  $("repetir").innerHTML=!a&&u&&!lines.length?'<div class="repetir"><span style="font-size:1.8rem">🔁</span><span class="tx"><b>¿Lo de siempre?</b>'+esc(u.resumen)+'</span><button type="button" id="btnRepetir">Repetir</button></div>':"";
+  if($("btnRepetir"))$("btnRepetir").onclick=()=>{
+    lines=[];u.items.forEach(it=>{const p=prods.find(x=>norm(x.nombre)===norm(it.n));if(p)lines.push({pid:p.id,orilla:!!it.o&&!p.bebida,ing:Array.isArray(it.i)?it.i.slice(0,2):[],cant:Math.max(1,parseInt(it.c,10)||1)});});
+    render();renderEnCurso();toast("¡Listo! Revisa tu pedido 👇");$("sec-pedido").scrollIntoView({behavior:"smooth"});};
+}
+
+// ---------- estrellas ----------
+{const s=$("stars");let h="";for(let i=0;i<18;i++)h+='<i style="left:'+(Math.random()*100)+'%;top:'+(Math.random()*90)+'%;animation-delay:'+(Math.random()*4).toFixed(2)+'s"></i>';s.innerHTML=h;}
+
+renderTop();renderEnvio();render();renderEnCurso();
+(async()=>{try{await leerClima();}catch(_){}renderTop();renderEnvio();renderCart();})();
+{const a=LS.get("pl-activo");if(a&&a.seg&&!["entregado","rechazado","cancelado"].includes(a.estado)){revisarEstado();setInterval(()=>{if(!document.hidden&&$("pantalla").hidden)revisarEstado();},20000);}}
 })();
 </script>
 </body>

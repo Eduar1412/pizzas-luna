@@ -314,6 +314,10 @@ tr:last-child td{border-bottom:0}
 .dina.off{background:none;border:1px dashed var(--line);padding:8px 12px}
 .dina.off small{font-size:.8rem}
 .dina button{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 10px;font-weight:700;font-size:.82rem;flex:0 0 auto}
+.pago-pend{background:rgba(95,176,255,.1);border:1px solid rgba(95,176,255,.4);border-radius:12px;padding:8px 10px;font-size:.9rem}
+.pago-pend small{color:var(--muted)}
+.olinea .acts{flex-wrap:wrap}
+.olinea .acts .btn{min-width:90px}
 /* Meta del día */
 .meta{padding:8px 16px 10px;border-bottom:1px solid var(--line);background:#0e0a06}
 .meta[hidden]{display:none}
@@ -446,6 +450,7 @@ tr:last-child td{border-bottom:0}
                 <button class="chip" type="button" data-v="Transferencia" aria-pressed="false">Transfer.</button>
               </div>
             </div>
+            <button class="btn sm wa" type="button" id="btnDatosPago" style="width:100%;margin-bottom:10px" hidden>Mandar datos de pago al cliente</button>
             <div class="field" id="pagaConWrap"><label for="pagaCon">Paga con (para saber el cambio)</label><input id="pagaCon" type="number" inputmode="decimal" min="0" placeholder="Ej. 500"></div>
             <div class="cambio num" id="cambio" hidden><span id="cambioL">Cambio</span><span id="cambioV">$0</span></div>
             <div class="field"><label for="notas">Notas</label><input id="notas" autocomplete="off" placeholder="Ej. sin cebolla, cambio de $500"></div>
@@ -625,6 +630,17 @@ tr:last-child td{border-bottom:0}
         <div class="field"><label for="envBusca">Buscar colonia</label><input id="envBusca" type="search" placeholder="Ej. Brisas"></div>
         <div id="envList" class="envlist"></div>
         <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" id="btnEnvAdd">Agregar colonia</button><button class="btn" type="button" id="btnEnvSave">Guardar precios</button></div>
+      </div>
+      <div class="card">
+        <h3>Pago por adelantado</h3>
+        <p class="hint">Los pedidos se preparan cuando ya están pagados. Estos datos le salen al cliente en tu link y en el mensaje de “Mandar datos de pago”.</p>
+        <label class="sw"><input type="checkbox" id="aPrepago"> Pedir pago antes de preparar (link de clientes)</label>
+        <div class="field"><label for="aCuenta">CLABE o número de tarjeta</label><input id="aCuenta" inputmode="numeric" autocomplete="off"></div>
+        <div class="two">
+          <div class="field"><label for="aBanco">Banco</label><input id="aBanco" autocomplete="off"></div>
+          <div class="field"><label for="aTitular">A nombre de</label><input id="aTitular" autocomplete="off"></div>
+        </div>
+        <button class="btn sm" type="button" id="btnPagoGuardar">Guardar</button>
       </div>
       <div class="card">
         <h3>Dinámica de reparto<small id="dinaEstado"></small></h3>
@@ -819,7 +835,7 @@ const MENU_INICIAL=[
   {id:"mixta",nombre:"Mixta",precio:190,cat:"pizza",esp:false},
   {id:"coca",nombre:"Coca desechable 2.5 L",precio:60,cat:"bebida",esp:false,coca:true}
 ];
-const AJUSTES_INICIALES={orilla:30,promoCoca:50,dinaMonto:10,dinaTemp:10,dinaAuto:true,meta:0,whats:"",horario:"",repartidores:[],pagoEntrega:0,
+const AJUSTES_INICIALES={orilla:30,promoCoca:50,prepago:true,pagoCuenta:"722969010071057611",pagoBanco:"Mercado Pago",pagoTitular:"Mónica Luna",dinaMonto:10,dinaTemp:10,dinaAuto:true,meta:0,whats:"",horario:"",repartidores:[],pagoEntrega:0,
   promoMsg:"¡Hola {nombre}! 🌙 Te extrañamos en Pizzas Luna. Esta semana pide tu pizza favorita y te regalamos la orilla rellena 🍕✨ ¡Te esperamos!"};
 const ENVIOS_INICIALES=[["Alamedas",65],["Alcali",45],["Arboledas",40],["Arcangeles",70],["Avance Popular",50],["Balcones",45],["Benito Juarez",45],["Brisas",80],["Bugambilias",45],["Cedis de Guadalajara",60],["Centro de Garcia",50],["Cerritos",70],["Colinas del Rio",45],["Cuetara",60],["El Cedral",45],["El Fraile 1 y 2",45],["El Polvo 1 y 2",45],["Emmsa",70],["Empresa Alcali",80],["Encinos",65],["Frisa",95],["Hacienda del Fraile",35],["Hacienda del Sol",45],["Heroes de Capellania",50],["Heroes de Lincoln",70],["Infonavit los Nogales",50],["Johnson Control",80],["Joyas de la Corona",60],["Joyas del Carrizal",55],["La Cruz",50],["La Martinez",45],["La Morelos",45],["La Paez",55],["Las Haciendas",40],["Las Torres",40],["Las Villas",40],["Los Nogales San Blas",60],["Mercedes",120],["Miguel Hidalgo",55],["Minas",50],["Mirador de Garcia",45],["Mirador del Fraile",45],["Nemak",140],["Nuevo Amanecer",45],["Paseo de Capellania",45],["Paseo de Lincoln",65],["Paseo del Nogal",45],["Portal de la Sierra",65],["Praderas de Lincoln",60],["Privada las Villas",40],["Privadas de Lincoln",60],["Privadas de Oasis",55],["Privalia",40],["Punta Diamante",40],["Punta Esmeralda",45],["Real de Capellanias",40],["Real de San Felipe",60],["Real de San Joaquin",65],["Real de Villas",45],["Renacimiento",65],["Rincon del Fraile",55],["Riveras de Capellanias",50],["San Blas",60],["Sierra Real",35],["Sobrevilla",45],["Sta. Elena",55],["Sta. Julia",65],["Sta. Lucia",70],["Sta. Monica",60],["Sta. Sofia",65],["Torre Luna",55],["Urbi Villa",35],["Valle de San Felipe",60],["Valle de San Jose",40],["Valles del Mirador",45],["Villa Azul",60],["Villa los Nogales",45],["Villa Nova",60],["Vista Montaña",30],["Vitro Flex",90]];
 let envios=ENVIOS_INICIALES.slice();
@@ -886,7 +902,7 @@ function ver(v){
 function seg(id,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b)return;$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));cb(b.dataset.v);});}
 function setSeg(id,v){$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v===v)));}
 seg("segTipo",v=>{tipo=v;$("dirWrap").hidden=v!=="Domicilio";renderCart();});
-seg("segPago",v=>{pago=v;$("pagaConWrap").hidden=v!=="Efectivo";renderCambio();});
+seg("segPago",v=>{pago=v;$("pagaConWrap").hidden=v!=="Efectivo";$("btnDatosPago").hidden=v!=="Transferencia";renderCambio();});
 seg("segEntrega",v=>{entrega=v;});
 
 // hojas
@@ -1170,12 +1186,22 @@ function leerMensaje(txt){
 
 // ================= guardar pedido =================
 function folioSiguiente(key){const d=DIAS[key];return d?Object.keys(d.ventas||{}).length+1:1;}
+function cuentaFmt(){return String(aj.pagoCuenta||"").replace(/\D/g,"");}
+function textoDatosPago(total,nombre,refc){
+  return "¡Hola"+(nombre?" "+nombre.split(" ")[0]:"")+"! 🌙 Para preparar tu pedido de *Pizzas Luna* necesitamos que esté liquidado.\n\n"+
+    "💰 *Total: "+money(total)+"*\n🏦 "+(aj.pagoBanco||"")+"\n🔢 CLABE: *"+cuentaFmt()+"*\n👤 A nombre de: "+(aj.pagoTitular||"")+(refc?"\n📝 Concepto: "+refc:"")+
+    "\n\nPor favor compárteme tu comprobante para poder ingresar tu pedido. ¡Gracias! 🍕";
+}
+$("btnDatosPago").addEventListener("click",()=>{
+  const t=tel10($("cTel").value);if(t.length!==10){toast("Escribe el teléfono del cliente");$("cTel").focus();return;}
+  if(!cuentaFmt()){toast("Pon tus datos de pago en Ajustes");return;}
+  abrirWa(t,textoDatosPago(totalForm(),$("cNom").value.trim(),""));});
 function textoPedido(v){
   const l=v.items.map(i=>"• "+i.cant+" "+nombreLinea(i)+(i.orilla?" con orilla rellena":"")).join("\n");
   return "¡Hola"+(v.cliente&&v.cliente.nombre?" "+v.cliente.nombre.split(" ")[0]:"")+"! 🌙 *Pizzas Luna* confirma tu pedido #"+v.folio+":\n\n"+l+
     (v.descuento?"\n• Promo Coca: −"+money(v.descuento):"")+
     (v.envio?"\n• Envío"+(v.envio.colonia?" a "+v.envio.colonia:"")+": "+money(v.envio.monto)+(v.envio.extra?" (incluye "+money(v.envio.extra)+" de dinámica de reparto por "+v.envio.motivo+")":""):"")+
-    "\n\n*Total: "+money(v.total)+"*\nPago: "+v.pago+(v.pagaCon?" (con "+money(v.pagaCon)+", cambio "+money(v.pagaCon-v.total)+")":"")+
+    "\n\n*Total: "+money(v.total)+"*"+(v.pagado?" ✅ Pagado":"")+"\nPago: "+v.pago+(v.pagaCon?" (con "+money(v.pagaCon)+", cambio "+money(v.pagaCon-v.total)+")":"")+
     (v.tipo==="Domicilio"?"\nEntrega aprox.: "+v.entregaDe+" – "+v.entregaA+" ("+v.entrega+" min)\nDirección: "+v.cliente.dir+(v.cliente.ref?" ("+v.cliente.ref+")":""):
      v.tipo==="Para llevar"?"\nLista para recoger aprox.: "+v.entregaDe+" – "+v.entregaA:"")+
     "\n\n¡Gracias por tu preferencia! Sabores que enamoran, de la luna a tu mesa ✨";
@@ -1193,7 +1219,8 @@ $("btnGuardar").addEventListener("click",()=>{
     items:cart.map(c=>({pid:c.pid,nombre:c.nombre,precio:c.precio,cant:c.cant,cat:c.cat,esp:c.esp,coca:c.coca,orilla:c.orilla,orillaPrecio:c.orilla?aj.orilla:0,ing:c.ing})),
     subtotal:r.sub,descuento:r.desc,total:Math.round((r.total+envioForm())*100)/100,pizzas:r.pizzas,
     entrega,entregaDe:hhmm(new Date(ahora.getTime()+a*6e4)),entregaA:hhmm(new Date(ahora.getTime()+b*6e4)),entregaLimite:new Date(ahora.getTime()+b*6e4).toISOString(),
-    pago,notas:$("notas").value.trim(),estado:"preparando",anulada:false,huella:huellaActual||undefined
+    pago,notas:$("notas").value.trim(),estado:"preparando",anulada:false,huella:huellaActual||undefined,
+    seg:segActual||undefined,pagado:pagadoActual||undefined,refc:refActual||undefined
   };
   const pc=parseFloat($("pagaCon").value);if(pago==="Efectivo"&&!isNaN(pc))v.pagaCon=pc;
   const id=uid();
@@ -1210,6 +1237,7 @@ $("btnGuardar").addEventListener("click",()=>{
     }
   }).then(()=>{
     ultimoGuardado=v;
+    if(v.seg)avisarCliente(v.seg,{e:"preparando",eta:v.tipo!=="En local"?v.entregaDe+"–"+v.entregaA:"",folio:v.folio,tipo:v.tipo});
     $("okTxt").textContent="Pedido #"+v.folio+" · "+money(v.total)+(v.tipo!=="En local"?" · listo "+v.entregaDe+"–"+v.entregaA:"");
     $("btnOkWa").hidden=!v.cliente.tel;
     limpiarForm();abrir("shOk");refrescarHoy();
@@ -1218,11 +1246,11 @@ $("btnGuardar").addEventListener("click",()=>{
 $("btnOkPrint").addEventListener("click",()=>{if(ultimoGuardado)imprimir(ultimoGuardado);});
 $("btnOkWa").addEventListener("click",()=>{if(ultimoGuardado)abrirWa(ultimoGuardado.cliente.tel,textoPedido(ultimoGuardado));cerrar("shOk");});
 function limpiarForm(){
-  huellaActual="";
+  huellaActual="";segActual="";pagadoActual=false;refActual="";
   cart=[];["cTel","cNom","cDir","cRef","cCol","cEnv","pagaCon","notas"].forEach(i=>$(i).value="");$("colSug").innerHTML="";
   $("conocido").hidden=true;$("sugerencias").innerHTML="";
   tipo="Domicilio";setSeg("segTipo",tipo);$("dirWrap").hidden=false;
-  pago="Efectivo";setSeg("segPago",pago);$("pagaConWrap").hidden=false;
+  pago="Efectivo";setSeg("segPago",pago);$("pagaConWrap").hidden=false;$("btnDatosPago").hidden=true;
   entrega=dinaActiva()?"45/50":"40/45";setSeg("segEntrega",entrega);
   renderCart();$("folioNuevo").textContent="#"+folioSiguiente(dayKey());
 }
@@ -1309,12 +1337,14 @@ $("listaPedidos").addEventListener("click",e=>{
   const mod=(id,fn)=>enCola(async()=>{const d=JSON.parse(JSON.stringify(DIAS[key]));if(!d||!d.ventas[id])return;fn(d.ventas[id]);await putDia(d);}).then(refrescarHoy).then(renderPedidos).catch(()=>status("No se pudo actualizar el pedido."));
   if(b.dataset.adv){const id=b.dataset.adv;const v0=DIAS[key].ventas[id];
     if(v0&&v0.estado==="preparando"&&v0.tipo==="Domicilio"&&(aj.repartidores||[]).length){
-      elegirRepartidor(nombre=>mod(id,v=>{v.estado="camino";v.salioA=new Date().toISOString();if(nombre)v.repartidor=nombre;}));return;}
-    mod(id,v=>{v.estado=v.estado==="preparando"?"camino":"entregado";if(v.estado==="camino")v.salioA=new Date().toISOString();if(v.estado==="entregado")v.entregadoA=new Date().toISOString();});}
+      elegirRepartidor(nombre=>{mod(id,v=>{v.estado="camino";v.salioA=new Date().toISOString();if(nombre)v.repartidor=nombre;});if(v0.seg)avisarCliente(v0.seg,{e:"camino",rep:nombre||""});});return;}
+    const sig=v0&&v0.estado==="preparando"?"camino":"entregado";
+    mod(id,v=>{v.estado=sig;if(sig==="camino")v.salioA=new Date().toISOString();if(sig==="entregado")v.entregadoA=new Date().toISOString();});
+    if(v0&&v0.seg)avisarCliente(v0.seg,{e:sig==="camino"&&v0.tipo!=="Domicilio"?"listo":sig});}
   else if(b.dataset.print){const v=DIAS[key].ventas[b.dataset.print];if(v)imprimir(v);}
   else if(b.dataset.wa){const v=DIAS[key].ventas[b.dataset.wa];if(v){const msg=v.estado==="camino"?"¡Hola"+(v.cliente.nombre?" "+v.cliente.nombre.split(" ")[0]:"")+"! 🌙 Tu pedido #"+v.folio+" de Pizzas Luna ya va en camino. Total: "+money(v.total)+". ¡Buen provecho!":textoPedido(v);abrirWa(v.cliente.tel,msg);}}
   else if(b.dataset.cancel){const id=b.dataset.cancel;confirmar("El pedido se marcará como cancelado y no contará en las ventas.","Sí, cancelar",()=>{
-    mod(id,v=>{v.anulada=true;});
+    mod(id,v=>{v.anulada=true;});{const v1=DIAS[key].ventas[id];if(v1&&v1.seg)avisarCliente(v1.seg,{e:"cancelado"});}
     const v=DIAS[key].ventas[id];if(v&&v.cliente&&v.cliente.tel&&CLIENTES[v.cliente.tel]){const c=Object.assign({},CLIENTES[v.cliente.tel]);c.pedidos=Math.max(0,c.pedidos-1);c.total=Math.max(0,Math.round((c.total-v.total)*100)/100);enCola(()=>putCli(c));}
   });}
 });
@@ -1480,6 +1510,7 @@ let draft=null;
 function renderAjustes(){
   if(!draft)draft=JSON.parse(JSON.stringify(menu));
   $("aOrilla").value=aj.orilla;$("aPromo").value=aj.promoCoca;
+  $("aPrepago").checked=aj.prepago!==false;$("aCuenta").value=aj.pagoCuenta||"";$("aBanco").value=aj.pagoBanco||"";$("aTitular").value=aj.pagoTitular||"";
   $("aDinaMonto").value=aj.dinaMonto;$("aDinaTemp").value=aj.dinaTemp;$("aDinaAuto").checked=aj.dinaAuto!==false;
   $("aWhats").value=aj.whats||"";$("aMeta").value=aj.meta||"";$("aHorario").value=aj.horario||"";$("aPagoEnt").value=aj.pagoEntrega||"";
   $("aPromoMsg").value=aj.promoMsg||AJUSTES_INICIALES.promoMsg;
@@ -1544,6 +1575,9 @@ function linkMenu(){
   if(Number(aj.promoCoca)!==50)data.pc=aj.promoCoca;
   if(JSON.stringify(m)!==MENU_BASE_LINK)data.m=m;
   if(linea){data.t=linea.topic;data.k=linea.pub;}
+  if(aj.prepago!==false&&cuentaFmt()){data.pp=1;if(cuentaFmt()!==AJUSTES_INICIALES.pagoCuenta||aj.pagoBanco!==AJUSTES_INICIALES.pagoBanco||aj.pagoTitular!==AJUSTES_INICIALES.pagoTitular){data.pk=cuentaFmt();data.pb=aj.pagoBanco||"";data.pt=aj.pagoTitular||"";}}
+  {const hace=Date.now()-30*864e5,cnt={};Object.values(DIAS).forEach(d=>Object.values(d.ventas||{}).forEach(v=>{if(v.anulada||new Date(v.hora).getTime()<hace)return;(v.items||[]).forEach(i=>{if(i.cat==="pizza")cnt[i.nombre]=(cnt[i.nombre]||0)+(Number(i.cant)||0);});}));
+   const fav=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).slice(0,2).filter(n=>cnt[n]>=3);if(fav.length)data.f=fav;}
   if(Number(aj.dinaMonto)!==10)data.dm=aj.dinaMonto;if(Number(aj.dinaTemp)!==10)data.dt=aj.dinaTemp;if(aj.dinaAuto===false)data.da=0;
   {const base={};ENVIOS_INICIALES.forEach(e=>base[colKey(e[0])]=e);const act={};envios.forEach(e=>act[colKey(e[0])]=e);
    const cambios=envios.filter(e=>{const b=base[colKey(e[0])];return !b||b[1]!==e[1]||b[0]!==e[0];});
@@ -1703,6 +1737,11 @@ function itemsLinea(o){
     const ing=Array.isArray(it.i)?it.i.filter(x=>INGREDIENTES.includes(x)).slice(0,2):[];
     return{key:p.id+"|"+ing.join("+"),pid:p.id,nombre:p.nombre,precio:Number(p.precio)||0,cat:p.cat||"pizza",esp:!!p.esp,coca:!!p.coca,cant,orilla:!!(it.o&&p.cat!=="bebida"),ing};}).filter(Boolean);
 }
+let segActual="",pagadoActual=false,refActual="";
+async function avisarCliente(topic,data){
+  try{await fetch(NTFY+"/",{method:"POST",body:JSON.stringify({topic,message:JSON.stringify(Object.assign({t:Date.now()},data)),title:"Pizzas Luna"})});}catch(_){}
+}
+function segDe(o){return o&&o.oid&&linea?linea.topic+"-"+String(o.oid).replace(/[^a-z0-9]/gi,"").slice(0,16):"";}
 function renderBandeja(){
   const pend=bandeja.filter(b=>b.estado==="nuevo").sort((a,b)=>a.recibido-b.recibido);
   const tab=document.querySelector('nav.tabs button[data-view="pedido"]');
@@ -1717,15 +1756,25 @@ function renderBandeja(){
       (Number(o.total)&&Math.abs(Number(o.total)-(calcular(its).total+env))>0.5?'<small style="color:#ffb08a;font-weight:700">⚠️ El cliente vio '+money(o.total)+' (su link tiene precios viejos). Confírmale el total.</small>':'')+
       (its.length<(o.items||[]).length?'<small style="color:#ffb08a;font-weight:700">⚠️ Pidió algo que ya no está en tu menú: '+esc((o.items||[]).filter(it=>!menu.find(x=>norm(x.nombre)===norm(it.n)||norm(it.n).includes(norm(x.nombre)))).map(it=>it.c+" "+it.n).join(", "))+'</small>':'')+
       (o.dir?'<small>📍 '+esc(o.dir)+(o.col?', '+esc(o.col):'')+(o.ref?' · '+esc(o.ref):'')+'</small>':'')+(ec?'<small>🛵 Envío a '+esc(ec[0])+': '+money(env)+(dinaActiva()?' (incluye dinámica)':'')+'</small>':(o.col&&o.tipo!=="Para llevar"?'<small>🛵 Colonia fuera del tabulador: pon el envío a mano</small>':''))+(o.nota?'<small>📝 '+esc(o.nota)+'</small>':'')+
-      '<div class="acts"><button class="btn ghost" type="button" data-rech="'+esc(b.id)+'">Rechazar</button><button class="btn" type="button" data-acep="'+esc(b.id)+'">Aceptar</button></div></article>';}).join("")+'</section>':"";
+      (o.pre&&!b.pagado?'<div class="pago-pend">💳 <b>Esperando pago</b> · '+money(calcular(its).total+env)+(o.refc?' · Ref. <b class="num">'+esc(o.refc)+'</b>':'')+'<br><small>Cuando te llegue su comprobante por WhatsApp, toca “Ya pagó”.</small></div>':'')+
+      '<div class="acts">'+(o.pre&&!b.pagado?
+        '<button class="btn ghost" type="button" data-rech="'+esc(b.id)+'">Rechazar</button><button class="btn ghost" type="button" data-recp="'+esc(b.id)+'">Recordar pago</button><button class="btn" type="button" data-pago="'+esc(b.id)+'">✅ Ya pagó</button>':
+        '<button class="btn ghost" type="button" data-rech="'+esc(b.id)+'">Rechazar</button><button class="btn" type="button" data-acep="'+esc(b.id)+'">Aceptar</button>')+'</div></article>';}).join("")+'</section>':"";
 }
 $("bandeja").addEventListener("click",e=>{
+  const pg=e.target.closest("[data-pago]"),rp=e.target.closest("[data-recp]");
+  if(pg){const b=bandeja.find(x=>x.id===pg.dataset.pago);if(!b)return;
+    const seguir=()=>{b.pagado=true;putKV("bandeja",bandeja.slice(-60));const s=segDe(b.o);if(s)avisarCliente(s,{e:"pagado"});aceptarLinea(b);};
+    if(cart.length)confirmar("Tienes un pedido a medias en pantalla. ¿Lo cambio por este?","Sí, cambiar",seguir);else seguir();return;}
+  if(rp){const b=bandeja.find(x=>x.id===rp.dataset.recp);if(!b||!b.o.tel)return;
+    const its=itemsLinea(b.o),ec=b.o.tipo!=="Para llevar"?((b.o.col&&buscarColonia(b.o.col))||detectarColonia(b.o.dir||"")):null;
+    abrirWa(b.o.tel,textoDatosPago(calcular(its).total+(ec?ec[1]+(dinaActiva()?Number(aj.dinaMonto)||0:0):0),b.o.nombre,b.o.refc));return;}
   const a=e.target.closest("[data-acep]"),r=e.target.closest("[data-rech]");
   if(a){const b=bandeja.find(x=>x.id===a.dataset.acep);if(!b)return;
     const cargar=()=>{aceptarLinea(b);};
     if(cart.length){confirmar("Tienes un pedido a medias en pantalla. ¿Lo cambio por este pedido en línea?","Sí, cambiar",cargar);}else cargar();}
   else if(r){const b=bandeja.find(x=>x.id===r.dataset.rech);if(!b)return;
-    confirmar("Se quitará el pedido de "+(b.o.nombre||"este cliente")+". Si quieres, avísale por WhatsApp que no se pudo.","Sí, rechazar",()=>{b.estado="rechazado";putKV("bandeja",bandeja.slice(-60));renderBandeja();
+    confirmar("Se quitará el pedido de "+(b.o.nombre||"este cliente")+". Si quieres, avísale por WhatsApp que no se pudo.","Sí, rechazar",()=>{b.estado="rechazado";putKV("bandeja",bandeja.slice(-60));renderBandeja();{const s=segDe(b.o);if(s)avisarCliente(s,{e:"rechazado"});}
       if(b.o.tel)abrirWa(b.o.tel,"¡Hola"+(b.o.nombre?" "+b.o.nombre.split(" ")[0]:"")+"! 🌙 Gracias por tu pedido en Pizzas Luna. Por ahora no podemos atenderlo, ¡disculpa! ");});}
 });
 function aceptarLinea(b){
@@ -1737,7 +1786,8 @@ function aceptarLinea(b){
   if(o.con)$("pagaCon").value=o.con;
   $("notas").value=o.nota||"";
   if(tipo==="Domicilio"){const col=(o.col&&buscarColonia(o.col))||detectarColonia((o.col||"")+" "+(o.dir||""));if(col)ponerColonia(col,true);else if(o.col)$("cCol").value=o.col;}
-  cart=itemsLinea(o);huellaActual="linea:"+b.id;
+  cart=itemsLinea(o);huellaActual="linea:"+b.id;segActual=segDe(o);pagadoActual=!!b.pagado;refActual=o.refc||"";
+  if(b.pagado){pago="Transferencia";setSeg("segPago",pago);$("pagaConWrap").hidden=true;$("btnDatosPago").hidden=true;$("notas").value=("✅ Pagado"+(o.refc?" · Ref "+o.refc:"")+(o.nota?" · "+o.nota:""));}
   b.estado="aceptado";putKV("bandeja",bandeja.slice(-60));renderBandeja();renderCart();validar();
   toast("Elige el tiempo de entrega y toca Guardar pedido");
   setTimeout(()=>$("segEntrega").scrollIntoView({behavior:"smooth",block:"center"}),300);
@@ -1763,6 +1813,7 @@ $("dinaBanner").addEventListener("click",async e=>{
   if(dinaActiva()&&!cart.length){entrega="45/50";setSeg("segEntrega",entrega);}
   toast(dinaActiva()?"Dinámica activada: +"+money(aj.dinaMonto)+" en cada envío de hoy":"Dinámica quitada por hoy");
 });
+$("btnPagoGuardar").addEventListener("click",()=>guardarAj({prepago:$("aPrepago").checked,pagoCuenta:$("aCuenta").value.replace(/\s+/g,""),pagoBanco:$("aBanco").value.trim(),pagoTitular:$("aTitular").value.trim()},"Datos de pago guardados"));
 $("btnDinaGuardar").addEventListener("click",()=>guardarAj({dinaMonto:Math.max(0,parseFloat($("aDinaMonto").value)||0),dinaTemp:parseFloat($("aDinaTemp").value)||10,dinaAuto:$("aDinaAuto").checked},"Dinámica guardada").then(()=>{renderDina();renderCart();}));
 async function revisarClima(){
   const antes=dinaActiva();
