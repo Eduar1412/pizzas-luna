@@ -294,6 +294,17 @@ tr:last-child td{border-bottom:0}
 .pasos li{line-height:1.45}
 .pasos .btn{margin-top:8px;display:inline-block;text-decoration:none}
 .avisos-on{margin-top:10px;color:var(--ok);font-weight:800}
+.invitar-big{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:1.5px solid var(--gold);background:linear-gradient(135deg,rgba(255,215,120,.16),rgba(23,17,11,.6));border-radius:16px;padding:12px 14px;margin-bottom:14px;font-size:1.6rem}
+.invitar-big b{display:block;font-size:1rem;color:var(--gold-hi)}
+.invitar-big small{display:block;font-size:.82rem;color:var(--muted)}
+.invitar-big>span:nth-child(1){flex:1}
+.invitar-big .chev{font-size:1.6rem;color:var(--gold-hi);flex:0 0 auto}
+.inv-op{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px;background:var(--surface-2)}
+.inv-op b{color:var(--gold-hi)}
+.inv-op p{margin:6px 0 10px;font-size:.9rem;color:var(--muted)}
+.cola-prox{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:.92rem}
+.cola-bar{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-bottom:10px}
+.cola-bar div{height:100%;background:var(--gold-grad)}
 /* Meta del día */
 .meta{padding:8px 16px 10px;border-bottom:1px solid var(--line);background:#0e0a06}
 .meta[hidden]{display:none}
@@ -358,6 +369,7 @@ tr:last-child td{border-bottom:0}
     <!-- ===== NUEVO PEDIDO ===== -->
     <section class="view on" id="v-pedido" aria-label="Nuevo pedido">
       <div id="bandeja"></div>
+      <button class="invitar-big" type="button" id="btnInvitar">📣 <span><b>Invitar clientes a pedir en línea</b><small id="invSub">Manda tu menú nuevo por WhatsApp</small></span><span class="chev" aria-hidden="true">›</span></button>
       <button class="aviso-banner" type="button" id="bannerAvisos" hidden>🔔 <span><b>Activa los avisos de pedidos</b><small>Para que te suene el celular aunque la app esté cerrada. Toma 1 minuto.</small></span></button>
       <button class="pegar-big" type="button" id="btnPegar">
         <span class="pg-ico" aria-hidden="true">📋</span>
@@ -720,6 +732,30 @@ tr:last-child td{border-bottom:0}
     </ol>
     <div class="codigo"><code class="num" id="lineaTopic"></code><button class="btn sm ghost" type="button" id="btnCopiarTopic">Copiar código</button></div>
     <div class="row" style="margin-top:14px"><button class="btn ghost" type="button" data-close>Después</button><button class="btn" type="button" id="btnAvListo">¡Ya me sonó!</button></div>
+  </div>
+</div>
+<div class="sheet-bg" id="shInv" role="dialog" aria-modal="true" aria-labelledby="shInvT">
+  <div class="sheet">
+    <h2 id="shInvT">Invitar a mis clientes 📣</h2>
+    <div id="invPrep"></div>
+    <div id="invOpciones">
+      <div class="inv-op">
+        <b>1 · A varios chats a la vez</b>
+        <p>Se abre WhatsApp y eliges hasta 5 chats o grupos. Repite las veces que quieras.</p>
+        <button class="btn wa" type="button" id="invVarios">Elegir chats en WhatsApp</button>
+      </div>
+      <div class="inv-op">
+        <b>2 · A cada cliente guardado, uno por uno</b>
+        <p id="invCliTxt"></p>
+        <div id="invCola"></div>
+      </div>
+      <div class="inv-op">
+        <b>3 · A todos tus contactos con una lista de difusión</b>
+        <p>En WhatsApp Business toca <b>Chats → ⋯ (o Herramientas) → Listas de difusión → Nueva lista</b>, elige a tus clientes (hasta 256) y pega el mensaje. Les llega como mensaje normal, pero solo a quienes tienen tu número guardado.</p>
+        <button class="btn ghost" type="button" id="invCopiar">Copiar mensaje</button>
+      </div>
+    </div>
+    <button class="btn ghost" type="button" data-close style="margin-top:6px">Cerrar</button>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1461,12 +1497,51 @@ function linkMenu(){
   const b64=btoa(unescape(encodeURIComponent(JSON.stringify(data)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
   return new URL("menu.html",location.href).href+"#"+b64;}
 $("btnMenuVer").addEventListener("click",()=>{const a=document.createElement("a");a.href=linkMenu();a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();});
-$("btnMenuShare").addEventListener("click",async()=>{
-  if(!aj.whats){toast("Primero pon el WhatsApp de la pizzería en “Mi negocio”");$("aWhats").focus();return;}
+function textoInvitacion(nombre){
   const url=linkMenu();
-  const txt="🌙✨ *¡Pizzas Luna se renueva!* ✨🌙\n\nPara tu mayor comodidad, ahora puedes hacer tu pedido desde nuestro *nuevo menú en línea* 🍕\n\n✅ Ves todas nuestras pizzas y promociones\n✅ Armas tu pedido en un minuto\n✅ Nos llega directo y te confirmamos por WhatsApp\n\n👉 *Haz tu pedido aquí:*\n"+url+"\n\nGuárdalo para tu próximo antojo 😉\n_Sabores que enamoran, de la luna a tu mesa_ 💛";
-  try{if(navigator.share){await navigator.share({title:"Menú Pizzas Luna",text:txt});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+  return (nombre?"¡Hola "+nombre.split(" ")[0]+"! ":"")+"🌙✨ *¡Pizzas Luna se renueva!* ✨🌙\n\nPara tu mayor comodidad, ahora puedes hacer tu pedido desde nuestro *nuevo menú en línea* 🍕\n\n✅ Ves todas nuestras pizzas y promociones\n✅ Armas tu pedido en un minuto\n✅ Nos llega directo y te confirmamos por WhatsApp\n\n👉 *Haz tu pedido aquí:*\n"+url+"\n\nGuárdalo para tu próximo antojo 😉\n_Sabores que enamoran, de la luna a tu mesa_ 💛";
+}
+$("btnMenuShare").addEventListener("click",()=>abrirInvitar());
+// ===== invitar clientes =====
+function abrirInvitar(){renderInvitar();abrir("shInv");}
+$("btnInvitar").addEventListener("click",abrirInvitar);
+function renderInvitar(){
+  const listo=!!linea&&!!aj.whats;
+  $("invOpciones").hidden=!listo;
+  $("invPrep").innerHTML=listo?'<p class="hint" style="margin-bottom:12px">Tus clientes abren el link, eligen sus pizzas y el pedido te llega directo aquí.</p>':
+    '<p class="hint">Antes de invitar, deja lista tu tienda en línea (solo una vez):</p>'+
+    (aj.whats?'':'<div class="field"><label for="invWhats">WhatsApp de la pizzería</label><input id="invWhats" type="tel" inputmode="tel" placeholder="10 dígitos"></div>')+
+    '<button class="btn" type="button" id="invActivar">Activar y continuar</button>';
+  if(!listo){$("invActivar").onclick=async()=>{
+      if(!aj.whats){const w=tel10(($("invWhats")||{}).value||"");if(w.length!==10){toast("Escribe el WhatsApp a 10 dígitos");return;}await guardarAj({whats:w},"WhatsApp guardado");}
+      if(!linea){await activarLinea(false);}
+      renderInvitar();};return;}
+  renderCola();
+}
+let invQ=null,colaI=0,colaEsperando=false;
+function clientesInvitables(todos){return Object.values(CLIENTES).filter(c=>/^\d{10}$/.test(c.tel||"")&&(todos||!c.invitado)).sort((a,b)=>String(b.ultimo||"").localeCompare(String(a.ultimo||"")));}
+function renderCola(){
+  const pend=clientesInvitables(false),todos=Object.values(CLIENTES).filter(c=>/^\d{10}$/.test(c.tel||"")).length;
+  $("invCliTxt").textContent=todos?("Tienes "+todos+" clientes con teléfono. "+(pend.length?"Faltan "+pend.length+" por invitar. Tocas el botón, se abre su chat con el mensaje listo, das enviar y regresas aquí: el siguiente ya estará listo.":"¡Ya invitaste a todos! 🎉")):"Aquí aparecerán tus clientes cuando guardes pedidos con teléfono.";
+  if(!invQ)invQ=pend.map(c=>c.tel);
+  const actual=invQ[colaI],c=actual&&CLIENTES[actual];
+  if(!pend.length&&!c){$("invCola").innerHTML=todos?'<button class="btn sm ghost" type="button" id="invReiniciar">Invitar otra vez a todos</button>':"";
+    if($("invReiniciar"))$("invReiniciar").onclick=()=>{invQ=clientesInvitables(true).map(x=>x.tel);colaI=0;renderCola();};return;}
+  if(!c){invQ=pend.map(x=>x.tel);colaI=0;return renderCola();}
+  const pct=invQ.length?Math.round(colaI/invQ.length*100):0;
+  $("invCola").innerHTML='<div class="cola-bar"><div style="width:'+pct+'%"></div></div>'+
+    '<div class="cola-prox"><span>'+(colaI+1)+' de '+invQ.length+'</span><button class="linkbtn" type="button" id="invSaltar">Saltar</button></div>'+
+    '<button class="btn wa" type="button" id="invUno">Mandar a '+esc(c.nombre||c.tel)+'</button>';
+  $("invSaltar").onclick=()=>{colaI++;renderCola();};
+  $("invUno").onclick=()=>{abrirWa(c.tel,textoInvitacion(c.nombre));colaEsperando=true;
+    const n=Object.assign({},c,{invitado:new Date().toISOString()});enCola(()=>putCli(n));
+    setTimeout(()=>{if(colaEsperando&&!document.hidden){colaEsperando=false;colaI++;renderCola();}},4000);};
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&colaEsperando){colaEsperando=false;colaI++;if($("shInv").classList.contains("on"))renderCola();}});
+$("invVarios").addEventListener("click",async()=>{const txt=textoInvitacion();
+  try{if(navigator.share){await navigator.share({text:txt});return;}}catch(e){if(e&&e.name==="AbortError")return;}
   abrirWa("",txt);});
+$("invCopiar").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(textoInvitacion());toast("Mensaje copiado. Pégalo en tu lista de difusión");}catch(_){toast("No se pudo copiar");}});
 // imprimir
 function imprimir(v){
   const L=(a,b)=>'<div class="it"><span>'+a+'</span><span>'+b+'</span></div>';
@@ -1496,16 +1571,17 @@ async function descifrar(txt){
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64u(o.iv)},key,ub64u(o.c));
   return JSON.parse(new TextDecoder().decode(pt));
 }
-$("btnLineaOn").addEventListener("click",async()=>{
+$("btnLineaOn").addEventListener("click",()=>activarLinea(true));
+async function activarLinea(conAvisos){
   if(!window.crypto||!crypto.subtle){status("Este navegador no permite pedidos en línea. Abre la app desde su ícono.");return;}
   try{
     const kp=await crypto.subtle.generateKey({name:"ECDH",namedCurve:"P-256"},true,["deriveKey"]);
     const rnd=Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>"abcdefghijkmnpqrstuvwxyz23456789"[x%32]).join("");
     linea={topic:"pizzasluna-"+rnd,pub:b64u(await crypto.subtle.exportKey("raw",kp.publicKey)),priv:await crypto.subtle.exportKey("jwk",kp.privateKey),since:"",creado:new Date().toISOString()};
     await putKV("linea",linea);renderLinea();toast("¡Listo! Ya puedes recibir pedidos en línea");revisarLinea();
-    setTimeout(abrirAvisos,600);
+    if(conAvisos)setTimeout(abrirAvisos,600);
   }catch(e){console.error(e);status("No se pudo activar. Intenta de nuevo con internet.");}
-});
+}
 function renderLinea(){
   $("lineaOff").hidden=!!linea;$("lineaOn").hidden=!linea;
   $("lineaEstado").textContent=linea?"✓ Activos":"";
