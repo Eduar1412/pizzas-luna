@@ -67,6 +67,16 @@ h2{font-family:var(--font-display);font-weight:400;color:var(--gold-hi);font-siz
 .bar button:disabled{background:var(--surface-2);color:var(--muted);box-shadow:none;cursor:not-allowed}
 .hint{color:var(--muted);font-size:.85rem;margin:6px 0 0}
 .err{color:#ff8a7a;font-size:.88rem;margin:8px 0 0;min-height:1.2em}
+.bar button.online{background:var(--gold-grad);color:#1a1006;box-shadow:0 6px 22px rgba(240,170,60,.3)}
+.done{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px;z-index:30}
+.done[hidden]{display:none}
+.done-card{background:var(--surface);border:1px solid var(--gold-lo);border-radius:22px;padding:24px 20px;max-width:420px;width:100%;text-align:center;box-shadow:0 0 50px rgba(255,170,50,.25)}
+.done-card img{border-radius:50%;box-shadow:0 0 30px rgba(255,170,50,.5)}
+.done-card h2{margin:12px 0 6px;font-size:1.6rem}
+.done-card p{color:var(--muted);margin:0 0 14px}
+.done-card .resumen{text-align:left;background:#0f0b07;border-radius:12px;padding:10px 12px;font-size:.92rem;margin-bottom:14px;white-space:pre-line}
+.done-card .ok{border:0;border-radius:14px;padding:14px;width:100%;font-weight:800;font-size:1.05rem;background:var(--gold-grad);color:#1a1006}
+.alt{display:block;text-align:center;margin:10px auto 0;color:var(--muted);font-size:.85rem;background:none;border:0;text-decoration:underline;text-underline-offset:3px}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
 </style>
 </head>
@@ -109,10 +119,20 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
     <div class="field" id="conWrap"><label for="con">¿Con cuánto pagas? (para llevarte cambio)</label><input id="con" type="number" inputmode="decimal" min="0" placeholder="Ej. 500"></div>
     <div class="field"><label for="nota">Nota (opcional)</label><input id="nota" autocomplete="off" placeholder="Ej. sin cebolla"></div>
     <p class="err" id="err" role="alert"></p>
+    <button type="button" class="alt" id="porWa" hidden>Prefiero mandarlo por WhatsApp</button>
   </div>
   <footer>Pizzas Luna 🌙 · Los precios pueden cambiar sin aviso</footer>
 </div>
-<div class="bar"><button type="button" id="enviar" disabled><span>Pedir por WhatsApp</span><span class="num" id="barTot">$0</span></button></div>
+<div class="bar"><button type="button" id="enviar" disabled><span id="barTxt">Pedir por WhatsApp</span><span class="num" id="barTot">$0</span></button></div>
+<div class="done" id="done" hidden role="dialog" aria-modal="true" aria-labelledby="doneT">
+  <div class="done-card">
+    <img src="logo.jpg" alt="" width="110" height="110">
+    <h2 id="doneT">¡Pedido enviado!</h2>
+    <p id="doneTxt">Tu pedido ya llegó a Pizzas Luna. En unos minutos te confirmamos por WhatsApp con la hora de entrega.</p>
+    <div class="resumen" id="doneRes"></div>
+    <button type="button" class="ok" id="doneOk">Listo</button>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -124,7 +144,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const INGREDIENTES=["Peperoni","Hawaiana","Carnes frías","Mexicana","Italiana","Champiñones"];
 // menú por defecto; el link que comparte la pizzería trae los precios vigentes y su WhatsApp
 let cfg={w:"",h:"",o:30,pc:50,m:[["Peperoni",110,0,0,0,0],["Hawaiana",140,0,1,0,0],["Carnes frías",140,0,1,0,0],["Mexicana",140,0,1,0,0],["Champiñones",140,0,1,0,0],["Luna italiana",140,0,1,0,0],["Combinada",140,0,1,1,0],["Mixta",190,0,0,0,0],["Coca desechable 2.5 L",60,1,0,0,1]]};
-try{const hsh=location.hash.slice(1);if(hsh){const j=JSON.parse(decodeURIComponent(escape(atob(hsh.replace(/-/g,"+").replace(/_/g,"/")))));if(j&&Array.isArray(j.m))cfg=Object.assign(cfg,j);}}catch(_){}
+try{const hsh=location.hash.slice(1);if(hsh){const j=JSON.parse(decodeURIComponent(escape(atob(hsh.replace(/-/g,"+").replace(/_/g,"/")))));if(j&&typeof j==="object"){if(!Array.isArray(j.m))delete j.m;cfg=Object.assign(cfg,j);}}}catch(_){}
 const prods=cfg.m.map((x,i)=>({id:"p"+i,nombre:String(x[0]),precio:Number(x[1])||0,bebida:!!x[2],esp:!!x[3],comb:!!x[4],coca:!!x[5]}));
 if(cfg.h){$("horario").textContent=cfg.h;$("horario").hidden=false;}
 const cocaP=prods.find(p=>p.coca);
@@ -172,7 +192,24 @@ document.addEventListener("click",e=>{
 function seg(id,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b)return;$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));cb(b.dataset.v);});}
 seg("segTipo",v=>{tipo=v;$("dirWrap").hidden=v!=="Domicilio";});
 seg("segPago",v=>{pago=v;$("conWrap").hidden=v!=="Efectivo";});
-$("enviar").addEventListener("click",()=>{
+const enLinea=!!(cfg.t&&cfg.k&&window.crypto&&crypto.subtle&&window.fetch);
+if(enLinea){$("enviar").classList.add("online");$("barTxt").textContent="Enviar mi pedido";$("porWa").hidden=!cfg.w;}
+const b64u=buf=>{let s="";new Uint8Array(buf).forEach(x=>s+=String.fromCharCode(x));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");};
+const ub64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)),c=>c.charCodeAt(0));
+async function cifrar(obj){
+  const pub=await crypto.subtle.importKey("raw",ub64u(cfg.k),{name:"ECDH",namedCurve:"P-256"},false,[]);
+  const eph=await crypto.subtle.generateKey({name:"ECDH",namedCurve:"P-256"},true,["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"ECDH",public:pub},eph.privateKey,{name:"AES-GCM",length:256},false,["encrypt"]);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const c=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(obj)));
+  return JSON.stringify({e:b64u(await crypto.subtle.exportKey("raw",eph.publicKey)),iv:b64u(iv),c:b64u(c)});
+}
+let enviando=false;
+$("porWa").addEventListener("click",()=>enviarPedido(true));
+$("doneOk").addEventListener("click",()=>{$("done").hidden=true;});
+$("enviar").addEventListener("click",()=>enviarPedido(false));
+async function enviarPedido(forzarWa){
+  if(enviando)return;
   const err=$("err");err.textContent="";
   const falta=lines.find(l=>prods.find(p=>p.id===l.pid).comb&&l.ing.length!==2);
   if(falta){err.textContent="Elige 2 ingredientes para tu pizza combinada.";document.querySelector('[data-ing="'+lines.indexOf(falta)+'"]').scrollIntoView({behavior:"smooth",block:"center"});return;}
@@ -186,9 +223,25 @@ $("enviar").addEventListener("click",()=>{
     (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
     "\nPago: "+pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"")+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
   const w=String(cfg.w||"").replace(/\D/g,"");
-  const url="https://wa.me/"+(w.length===10?"52"+w:w)+"?text="+encodeURIComponent(txt);
-  const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
-});
+  const porWhats=()=>{const url="https://wa.me/"+(w.length===10?"52"+w:w)+"?text="+encodeURIComponent(txt);
+    const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();};
+  if(!enLinea||forzarWa){porWhats();return;}
+  const pedido={v:1,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",ref:tipo==="Domicilio"?$("ref").value.trim():"",
+    pago,con:pago==="Efectivo"&&!isNaN(con)?con:"",nota:$("nota").value.trim(),total:r.total,hora:new Date().toISOString(),
+    items:lines.map(l=>({n:prods.find(p=>p.id===l.pid).nombre,c:l.cant,o:l.orilla?1:0,i:l.ing}))};
+  enviando=true;const btn=$("enviar");btn.disabled=true;$("barTxt").textContent="Enviando…";
+  try{
+    const body=await cifrar(pedido);
+    const resp=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:cfg.t,message:body,title:"🍕 Nuevo pedido en línea",tags:["pizza"],priority:4})});
+    if(!resp.ok)throw new Error("HTTP "+resp.status);
+    $("doneRes").textContent=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+"\n\nTotal: "+money(r.total);
+    $("doneTxt").textContent=tipo==="Domicilio"?"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp con la hora de entrega.":"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp a qué hora pasar por él.";
+    $("done").hidden=false;lines=[];render();
+  }catch(e){
+    err.textContent="No se pudo enviar por internet."+(w?" Toca “Prefiero mandarlo por WhatsApp”.":" Revisa tu conexión e intenta de nuevo.");
+    $("porWa").hidden=!w;
+  }finally{enviando=false;$("barTxt").textContent="Enviar mi pedido";render();}
+}
 try{const g=JSON.parse(localStorage.getItem("pl-cliente")||"null");if(g){["nom","tel","dir","ref"].forEach(k=>{if(g[k])$(k).value=g[k];});}}catch(_){}
 document.addEventListener("input",e=>{if(["nom","tel","dir","ref"].includes(e.target.id)){try{localStorage.setItem("pl-cliente",JSON.stringify({nom:$("nom").value,tel:$("tel").value,dir:$("dir").value,ref:$("ref").value}));}catch(_){}}});
 render();

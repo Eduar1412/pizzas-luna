@@ -262,6 +262,25 @@ tr:last-child td{border-bottom:0}
 .status{display:none;font-size:.88rem;padding:9px 16px;background:rgba(255,91,74,.15);border-bottom:1px solid rgba(255,91,74,.4)}
 .status.show{display:block}
 @media (prefers-reduced-motion:reduce){.toast,.prod{transition:none}}
+/* Pedidos en línea */
+.inbox{border:1.5px solid var(--gold);border-radius:18px;padding:14px;margin-bottom:14px;background:linear-gradient(160deg,rgba(255,215,120,.16),rgba(23,17,11,.95));box-shadow:0 0 26px rgba(255,190,80,.18)}
+.inbox h3{font-family:var(--font-display);font-weight:400;color:var(--gold-hi);font-size:1.15rem;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+.inbox h3 .dot{width:10px;height:10px;border-radius:50%;background:var(--ember);box-shadow:0 0 10px var(--ember);animation:pulso 1.2s infinite}
+@keyframes pulso{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.inbox h3 .dot{animation:none}}
+.olinea{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;display:grid;gap:6px}
+.olinea:last-child{margin-bottom:0}
+.olinea .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.olinea .top b{font-size:1.05rem}
+.olinea .top span{font-weight:800;font-size:1.1rem}
+.olinea small{color:var(--muted)}
+.olinea .acts{display:flex;gap:8px;margin-top:4px}
+.olinea .acts .btn{flex:1;padding:12px}
+.avisos{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.avisos summary{cursor:pointer;font-weight:700;color:var(--gold-hi)}
+.avisos ol{padding-left:20px;display:grid;gap:6px}
+.codigo{display:flex;gap:8px;align-items:center;background:#0f0b07;border:1px dashed var(--gold-lo);border-radius:12px;padding:8px 8px 8px 12px}
+.codigo code{flex:1;word-break:break-all;color:var(--gold-hi);font-size:.9rem}
 /* Meta del día */
 .meta{padding:8px 16px 10px;border-bottom:1px solid var(--line);background:#0e0a06}
 .meta[hidden]{display:none}
@@ -325,6 +344,7 @@ tr:last-child td{border-bottom:0}
   <main id="main">
     <!-- ===== NUEVO PEDIDO ===== -->
     <section class="view on" id="v-pedido" aria-label="Nuevo pedido">
+      <div id="bandeja"></div>
       <button class="pegar-big" type="button" id="btnPegar">
         <span class="pg-ico" aria-hidden="true">📋</span>
         <span><b>Pegar pedido de WhatsApp</b><small>Copia el mensaje del cliente y toca aquí</small></span>
@@ -558,10 +578,22 @@ tr:last-child td{border-bottom:0}
         </div>
         <div class="row"><button class="btn sm ghost" type="button" id="btnRepAdd">Agregar</button><button class="btn sm" type="button" id="btnRepSave">Guardar</button></div>
       </div>
-      <div class="card">
-        <h3>Menú para tus clientes</h3>
-        <p class="hint">Una página con tu logo y tus precios donde el cliente arma su pedido y te lo manda a tu WhatsApp. Ponla en tu estado o en Facebook. Si cambias precios, vuelve a compartirla.</p>
-        <div class="row"><button class="btn wa" type="button" id="btnMenuShare">Compartir mi menú</button><button class="btn ghost" type="button" id="btnMenuVer">Verlo</button></div>
+      <div class="card" id="cardLinea">
+        <h3>Pedidos en línea<small id="lineaEstado"></small></h3>
+        <p class="hint">Tus clientes abren tu link, eligen sus pizzas y el pedido <b>te llega directo a esta app</b>, sin WhatsApp. Te aparece hasta arriba en “Nuevo” para aceptarlo.</p>
+        <div id="lineaOff"><button class="btn" type="button" id="btnLineaOn">Activar pedidos en línea</button></div>
+        <div id="lineaOn" hidden>
+          <div class="row"><button class="btn wa" type="button" id="btnMenuShare">Mandar link a mis clientes</button><button class="btn ghost" type="button" id="btnMenuVer">Ver mi menú</button></div>
+          <p class="hint" style="margin-top:12px">Si cambias precios, vuelve a tocar “Mandar link a mis clientes”.</p>
+          <details class="avisos"><summary>Que me suene el celular aunque la app esté cerrada</summary>
+            <ol>
+              <li>Instala la app gratuita <b>ntfy</b> (App Store o Play Store).</li>
+              <li>Ábrela, toca <b>+</b> y pega este código:</li>
+            </ol>
+            <div class="codigo"><code class="num" id="lineaTopic"></code><button class="btn sm ghost" type="button" id="btnCopiarTopic">Copiar</button></div>
+            <p class="hint">Te llegará el aviso “🍕 Nuevo pedido en línea”. Toca el ícono de Pizzas Luna para verlo y aceptarlo. El aviso no muestra datos del cliente.</p>
+          </details>
+        </div>
       </div>
       <div class="card">
         <h3>Mensaje para recuperar clientes</h3>
@@ -1343,14 +1375,22 @@ $("btnRepSave").addEventListener("click",()=>{const pend=$("repNuevo").value.tri
   guardarAj({repartidores:repDraft.slice(),pagoEntrega:Math.max(0,parseFloat($("aPagoEnt").value)||0)},"Repartidores guardados").then(renderRepList);});
 $("btnGuardarPromo").addEventListener("click",()=>guardarAj({promoMsg:$("aPromoMsg").value.trim()||AJUSTES_INICIALES.promoMsg},"Mensaje guardado"));
 // menú para clientes
+const MENU_BASE_LINK=JSON.stringify(MENU_INICIAL.map(p=>[p.nombre,p.precio,p.cat==="bebida"?1:0,p.esp?1:0,p.combinada?1:0,p.coca?1:0]));
 function linkMenu(){
-  const data={w:aj.whats||"",h:aj.horario||"",o:aj.orilla,pc:aj.promoCoca,m:menu.map(p=>[p.nombre,p.precio,p.cat==="bebida"?1:0,p.esp?1:0,p.combinada?1:0,p.coca?1:0])};
+  const m=menu.map(p=>[p.nombre,p.precio,p.cat==="bebida"?1:0,p.esp?1:0,p.combinada?1:0,p.coca?1:0]);
+  const data={w:aj.whats||""};
+  if(aj.horario)data.h=aj.horario;
+  if(Number(aj.orilla)!==30)data.o=aj.orilla;
+  if(Number(aj.promoCoca)!==50)data.pc=aj.promoCoca;
+  if(JSON.stringify(m)!==MENU_BASE_LINK)data.m=m;
+  if(linea){data.t=linea.topic;data.k=linea.pub;}
   const b64=btoa(unescape(encodeURIComponent(JSON.stringify(data)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
   return new URL("menu.html",location.href).href+"#"+b64;}
 $("btnMenuVer").addEventListener("click",()=>{const a=document.createElement("a");a.href=linkMenu();a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();});
 $("btnMenuShare").addEventListener("click",async()=>{
   if(!aj.whats){toast("Primero pon el WhatsApp de la pizzería en “Mi negocio”");$("aWhats").focus();return;}
-  const url=linkMenu();const txt="🌙🍕 *Pizzas Luna* · ¡Haz tu pedido aquí! Elige tus pizzas y nos llega directo a WhatsApp 👇\n"+url;
+  const url=linkMenu();
+  const txt="🌙✨ *¡Pizzas Luna se renueva!* ✨🌙\n\nPara tu mayor comodidad, ahora puedes hacer tu pedido desde nuestro *nuevo menú en línea* 🍕\n\n✅ Ves todas nuestras pizzas y promociones\n✅ Armas tu pedido en un minuto\n✅ Nos llega directo y te confirmamos por WhatsApp\n\n👉 *Haz tu pedido aquí:*\n"+url+"\n\nGuárdalo para tu próximo antojo 😉\n_Sabores que enamoran, de la luna a tu mesa_ 💛";
   try{if(navigator.share){await navigator.share({title:"Menú Pizzas Luna",text:txt});return;}}catch(e){if(e&&e.name==="AbortError")return;}
   abrirWa("",txt);});
 // imprimir
@@ -1368,6 +1408,109 @@ function imprimir(v){
   const go=()=>{try{window.print();}catch(_){toast("Este teléfono no permite imprimir desde aquí");}};
   if(img.complete)setTimeout(go,50);else{img.onload=()=>setTimeout(go,50);img.onerror=go;}
 }
+// ================= pedidos en línea =================
+const NTFY="https://ntfy.sh";
+let linea=null,bandeja=[];
+const b64u=buf=>{let s="";new Uint8Array(buf).forEach(x=>s+=String.fromCharCode(x));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");};
+const ub64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)),c=>c.charCodeAt(0));
+let privKey=null;
+async function llavePrivada(){if(!privKey)privKey=await crypto.subtle.importKey("jwk",linea.priv,{name:"ECDH",namedCurve:"P-256"},false,["deriveKey"]);return privKey;}
+async function descifrar(txt){
+  const o=JSON.parse(txt);if(!o||!o.e||!o.iv||!o.c)throw 0;
+  const epub=await crypto.subtle.importKey("raw",ub64u(o.e),{name:"ECDH",namedCurve:"P-256"},false,[]);
+  const key=await crypto.subtle.deriveKey({name:"ECDH",public:epub},await llavePrivada(),{name:"AES-GCM",length:256},false,["decrypt"]);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64u(o.iv)},key,ub64u(o.c));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+$("btnLineaOn").addEventListener("click",async()=>{
+  if(!window.crypto||!crypto.subtle){status("Este navegador no permite pedidos en línea. Abre la app desde su ícono.");return;}
+  try{
+    const kp=await crypto.subtle.generateKey({name:"ECDH",namedCurve:"P-256"},true,["deriveKey"]);
+    const rnd=Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>"abcdefghijkmnpqrstuvwxyz23456789"[x%32]).join("");
+    linea={topic:"pizzasluna-"+rnd,pub:b64u(await crypto.subtle.exportKey("raw",kp.publicKey)),priv:await crypto.subtle.exportKey("jwk",kp.privateKey),since:"",creado:new Date().toISOString()};
+    await putKV("linea",linea);renderLinea();toast("¡Listo! Ya puedes recibir pedidos en línea");revisarLinea();
+  }catch(e){console.error(e);status("No se pudo activar. Intenta de nuevo con internet.");}
+});
+function renderLinea(){
+  $("lineaOff").hidden=!!linea;$("lineaOn").hidden=!linea;
+  $("lineaEstado").textContent=linea?"✓ Activos":"";
+  if(linea)$("lineaTopic").textContent=linea.topic;
+}
+$("btnCopiarTopic").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(linea.topic);toast("Código copiado");}catch(_){toast("Mantén el dedo sobre el código para copiarlo");}});
+let revisando=false,errLinea=0;
+async function revisarLinea(){
+  if(!linea||revisando||!navigator.onLine)return;revisando=true;
+  try{
+    const r=await fetch(NTFY+"/"+linea.topic+"/json?poll=1&since="+encodeURIComponent(linea.since||"12h"),{cache:"no-store"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const lineas=(await r.text()).split("\n").filter(Boolean);let nuevos=0,ultimo=linea.since;
+    for(const l of lineas){let m;try{m=JSON.parse(l);}catch(_){continue;}
+      if(m.event!=="message")continue;ultimo=m.id;
+      if(bandeja.some(b=>b.id===m.id))continue;
+      try{const o=await descifrar(m.message);if(!o||!Array.isArray(o.items)||!o.items.length)continue;
+        bandeja.push({id:m.id,recibido:m.time*1000,o,estado:"nuevo"});nuevos++;}catch(_){/* mensaje ajeno o dañado */}
+    }
+    if(ultimo!==linea.since){linea.since=ultimo;await putKV("linea",linea);}
+    if(nuevos){await putKV("bandeja",bandeja.slice(-60));avisarNuevo(nuevos);}
+    errLinea=0;
+  }catch(e){errLinea++;if(errLinea===3)console.warn("Pedidos en línea sin conexión",e);}
+  finally{revisando=false;renderBandeja();}
+}
+function avisarNuevo(n){
+  toast(n===1?"🍕 ¡Nuevo pedido en línea!":"🍕 ¡"+n+" pedidos en línea nuevos!");
+  if(navigator.vibrate){try{navigator.vibrate([200,100,200]);}catch(_){}}
+  try{const C=window.AudioContext||window.webkitAudioContext;const ctx=avisarNuevo.ctx||(avisarNuevo.ctx=new C());
+    [0,.18].forEach((t,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=i?1046:784;o.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(.0001,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.3,ctx.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+t+.25);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.3);});}catch(_){}
+  if(!$("v-pedido").classList.contains("on"))ver("pedido");
+}
+document.addEventListener("click",()=>{try{if(avisarNuevo.ctx&&avisarNuevo.ctx.state==="suspended")avisarNuevo.ctx.resume();else if(!avisarNuevo.ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)avisarNuevo.ctx=new C();}}catch(_){}},{once:true});
+function totalLinea(o){return calcular(itemsLinea(o)).total;}
+function itemsLinea(o){
+  return (o.items||[]).map(it=>{const p=menu.find(x=>norm(x.nombre)===norm(it.n))||menu.find(x=>norm(it.n).includes(norm(x.nombre)));
+    if(!p)return null;const cant=Math.max(1,Math.min(50,parseInt(it.c,10)||1));
+    const ing=Array.isArray(it.i)?it.i.filter(x=>INGREDIENTES.includes(x)).slice(0,2):[];
+    return{key:p.id+"|"+ing.join("+"),pid:p.id,nombre:p.nombre,precio:Number(p.precio)||0,cat:p.cat||"pizza",esp:!!p.esp,coca:!!p.coca,cant,orilla:!!(it.o&&p.cat!=="bebida"),ing};}).filter(Boolean);
+}
+function renderBandeja(){
+  const pend=bandeja.filter(b=>b.estado==="nuevo").sort((a,b)=>a.recibido-b.recibido);
+  const tab=document.querySelector('nav.tabs button[data-view="pedido"]');
+  let bd=tab.querySelector(".badge");if(!bd){bd=document.createElement("span");bd.className="badge num";tab.appendChild(bd);}
+  bd.hidden=!pend.length;bd.textContent=pend.length;
+  $("bandeja").innerHTML=pend.length?'<section class="inbox" aria-live="polite"><h3><span>'+(pend.length===1?"Pedido en línea nuevo":pend.length+" pedidos en línea nuevos")+'</span><span class="dot" aria-hidden="true"></span></h3>'+
+    pend.map(b=>{const o=b.o,its=itemsLinea(o);
+      return '<article class="olinea"><div class="top"><b>'+esc(o.nombre||"Cliente")+'</b><span class="num gold-text">'+money(calcular(its).total)+'</span></div>'+
+      '<small class="num">'+hhmm(new Date(b.recibido))+' · '+esc(o.tipo==="Para llevar"?"Pasa por ella":"A domicilio")+' · '+esc(o.pago||"")+(o.tel?' · '+esc(o.tel):'')+'</small>'+
+      '<div>'+its.map(i=>esc(i.cant+" × "+nombreLinea(i)+(i.orilla?" + orilla":""))).join("<br>")+'</div>'+
+      (o.dir?'<small>📍 '+esc(o.dir)+(o.ref?' · '+esc(o.ref):'')+'</small>':'')+(o.nota?'<small>📝 '+esc(o.nota)+'</small>':'')+
+      '<div class="acts"><button class="btn ghost" type="button" data-rech="'+esc(b.id)+'">Rechazar</button><button class="btn" type="button" data-acep="'+esc(b.id)+'">Aceptar</button></div></article>';}).join("")+'</section>':"";
+}
+$("bandeja").addEventListener("click",e=>{
+  const a=e.target.closest("[data-acep]"),r=e.target.closest("[data-rech]");
+  if(a){const b=bandeja.find(x=>x.id===a.dataset.acep);if(!b)return;
+    const cargar=()=>{aceptarLinea(b);};
+    if(cart.length){confirmar("Tienes un pedido a medias en pantalla. ¿Lo cambio por este pedido en línea?","Sí, cambiar",cargar);}else cargar();}
+  else if(r){const b=bandeja.find(x=>x.id===r.dataset.rech);if(!b)return;
+    confirmar("Se quitará el pedido de "+(b.o.nombre||"este cliente")+". Si quieres, avísale por WhatsApp que no se pudo.","Sí, rechazar",()=>{b.estado="rechazado";putKV("bandeja",bandeja.slice(-60));renderBandeja();
+      if(b.o.tel)abrirWa(b.o.tel,"¡Hola"+(b.o.nombre?" "+b.o.nombre.split(" ")[0]:"")+"! 🌙 Gracias por tu pedido en Pizzas Luna. Por ahora no podemos atenderlo, ¡disculpa! ");});}
+});
+function aceptarLinea(b){
+  const o=b.o;limpiarForm();
+  tipo=o.tipo==="Para llevar"?"Para llevar":"Domicilio";setSeg("segTipo",tipo);$("dirWrap").hidden=tipo!=="Domicilio";
+  $("cTel").value=tel10(o.tel||"");$("cNom").value=o.nombre||"";$("cDir").value=o.dir||"";$("cRef").value=o.ref||"";
+  const c=CLIENTES[tel10(o.tel||"")];if(c){usarCliente(c,false);$("cNom").value=o.nombre||c.nombre||"";$("cDir").value=o.dir||c.dir||"";$("cRef").value=o.ref||c.ref||"";}
+  if(["Efectivo","Tarjeta","Transferencia"].includes(o.pago)){pago=o.pago;setSeg("segPago",pago);$("pagaConWrap").hidden=pago!=="Efectivo";}
+  if(o.con)$("pagaCon").value=o.con;
+  $("notas").value=o.nota||"";
+  cart=itemsLinea(o);huellaActual="linea:"+b.id;
+  b.estado="aceptado";putKV("bandeja",bandeja.slice(-60));renderBandeja();renderCart();validar();
+  toast("Elige el tiempo de entrega y toca Guardar pedido");
+  setTimeout(()=>$("segEntrega").scrollIntoView({behavior:"smooth",block:"center"}),300);
+}
+setInterval(()=>{if(!document.hidden)revisarLinea();},20000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)revisarLinea();});
+window.addEventListener("online",revisarLinea);
+
 // ================= caja =================
 let gCat="Ingredientes";
 $("gCats").innerHTML=CATS_GASTO.map(c=>'<button type="button" class="chip" data-v="'+esc(c)+'" aria-pressed="'+(c===gCat)+'">'+esc(c)+'</button>').join("");
@@ -1483,7 +1626,8 @@ $("fileImport").addEventListener("change",async e=>{
     (await tx("clientes","readonly",s=>s.getAll())||[]).forEach(c=>{CLIENTES[c.tel]=c;});
     let m=await getKV("menu");if(!Array.isArray(m)){m=MENU_INICIAL;await putKV("menu",m);}menu=m;
     const a=await getKV("ajustes");if(a)aj=Object.assign({},AJUSTES_INICIALES,a);
-    renderMenu();renderCart();refrescarHoy();mostrarResp();
+    linea=await getKV("linea")||null;bandeja=await getKV("bandeja")||[];
+    renderMenu();renderCart();refrescarHoy();mostrarResp();renderLinea();renderBandeja();revisarLinea();
     if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
   }catch(err){console.error(err);status("Este navegador no deja guardar datos (¿modo incógnito?). Abre la app en Chrome normal.");}
 })();
