@@ -198,6 +198,22 @@ tr:last-child td{border-bottom:0}
 .bar-labels{display:flex;gap:3px;font-size:.65rem;color:var(--muted);margin-top:4px}
 .bar-labels span{flex:1;text-align:center}
 
+.per{grid-template-columns:repeat(4,1fr);margin-bottom:12px}
+.pnav{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px;margin-bottom:14px}
+.pnav button{height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2);font-size:1.6rem;line-height:1;color:var(--gold-hi)}
+.pnav button:disabled{opacity:.3;cursor:not-allowed}
+.pnav-t{text-align:center}
+.pnav-t b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.25rem;color:var(--gold-hi)}
+.pnav-t small{color:var(--muted);font-size:.8rem}
+.delta{display:block;font-size:.78rem;font-weight:800;margin-top:2px}
+.delta.up{color:var(--ok)}
+.delta.down{color:var(--bad)}
+.delta.flat{color:var(--muted);font-weight:700}
+.hbar{display:grid;grid-template-columns:70px 1fr 74px;gap:10px;align-items:center;padding:5px 0;font-size:.88rem}
+.hbar .trk{height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.hbar .fil{height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));border-radius:6px}
+.hbar .fil.top{box-shadow:0 0 10px rgba(255,200,90,.6)}
+.hbar span:last-child{text-align:right;color:var(--muted)}
 /* Clientes */
 .client{border-bottom:1px solid var(--line);padding:12px 0;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
 .client:last-child{border-bottom:0}
@@ -358,23 +374,39 @@ tr:last-child td{border-bottom:0}
 
     <!-- ===== REPORTES ===== -->
     <section class="view" id="v-reportes" aria-label="Reportes">
-      <div class="row" style="margin-bottom:14px;align-items:end">
-        <div class="field" style="margin:0;flex:1;min-width:160px"><label for="mesSel">Mes</label><input type="month" id="mesSel"></div>
-        <button class="btn sm wa" type="button" id="btnCopiar">Mandar resumen por WhatsApp</button>
+      <div class="chips per" id="segPer" role="group" aria-label="Periodo del reporte">
+        <button class="chip" type="button" data-v="dia" aria-pressed="false">Día</button>
+        <button class="chip" type="button" data-v="semana" aria-pressed="false">Semana</button>
+        <button class="chip" type="button" data-v="mes" aria-pressed="true">Mes</button>
+        <button class="chip" type="button" data-v="anio" aria-pressed="false">Año</button>
+      </div>
+      <div class="pnav">
+        <button type="button" id="perPrev" aria-label="Periodo anterior">‹</button>
+        <div class="pnav-t"><b id="perTitulo">—</b><small id="perSub"></small></div>
+        <button type="button" id="perNext" aria-label="Periodo siguiente">›</button>
       </div>
       <div class="tiles">
-        <div class="tile main"><small>Vendido en el mes</small><b class="num" id="rTotal">$0</b></div>
-        <div class="tile"><small>Pizzas</small><b class="num" id="rPizzas">0</b></div>
-        <div class="tile"><small>Promedio por día</small><b class="num" id="rProm">$0</b></div>
-        <div class="tile"><small>Mejor día</small><b class="num" id="rMejor">—</b></div>
+        <div class="tile main"><small>Vendido</small><b class="num" id="rTotal">$0</b><span class="delta" id="dTotal"></span></div>
+        <div class="tile"><small>Pizzas</small><b class="num" id="rPizzas">0</b><span class="delta" id="dPizzas"></span></div>
+        <div class="tile"><small>Pedidos</small><b class="num" id="rPedidos">0</b><span class="delta" id="dPedidos"></span></div>
+        <div class="tile"><small>Ticket promedio</small><b class="num" id="rProm">$0</b><span class="delta" id="dProm"></span></div>
+        <div class="tile"><small id="rMejorL">Mejor día</small><b class="num" id="rMejor">—</b><span class="delta flat" id="rMejorS"></span></div>
+        <div class="tile"><small>Hora más fuerte</small><b class="num" id="rHora">—</b><span class="delta flat" id="rHoraS"></span></div>
+        <div class="tile"><small>Entregas a tiempo</small><b class="num" id="rTiempo">—</b><span class="delta flat" id="rTiempoS"></span></div>
+        <div class="tile"><small>Clientes nuevos</small><b class="num" id="rNuevos">0</b><span class="delta flat" id="rNuevosS"></span></div>
       </div>
-      <div class="card"><h3>Venta por día</h3><div class="chart" id="chart"></div><div class="bar-labels num" id="barLabels"></div></div>
+      <div class="card"><h3><span id="chartT">Venta por día</span><small id="chartS"></small></h3><div class="chart" id="chart"></div><div class="bar-labels num" id="barLabels"></div></div>
+      <div class="row" style="margin-bottom:14px"><button class="btn wa" type="button" id="btnCopiar">Mandar este reporte por WhatsApp</button></div>
       <div class="cols">
-        <div class="card"><h3>Pizzas y productos</h3><table><thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Importe</th></tr></thead><tbody id="rTop"></tbody></table></div>
+        <div>
+          <div class="card"><h3>Pizzas y productos</h3><table><thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Importe</th></tr></thead><tbody id="rTop"></tbody></table></div>
+          <div class="card" id="cardSemana"><h3>Días de la semana<small>promedio por día</small></h3><div id="rDow"></div></div>
+        </div>
         <div>
           <div class="card"><h3>Por forma de pago</h3><table><tbody id="rPago"></tbody></table></div>
           <div class="card"><h3>Por tipo de pedido</h3><table><tbody id="rTipo"></tbody></table></div>
-          <div class="card"><h3>Mejores clientes del mes</h3><table><tbody id="rCli"></tbody></table></div>
+          <div class="card"><h3>Mejores clientes</h3><table><tbody id="rCli"></tbody></table></div>
+          <div class="card" id="cardHoras"><h3>Horas con más pedidos</h3><div id="rHoras"></div></div>
         </div>
       </div>
     </section>
@@ -906,26 +938,103 @@ function editarCliente(c){
 }
 
 // ================= reportes =================
-$("mesSel").value=monthKey();$("mesSel").addEventListener("change",renderMes);
-let resumenTxt="";
+let periodo="mes",ancla=new Date();ancla.setHours(12,0,0,0);
+let resumenTxt="",vsTxt="";
+const DOW=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+const MESES=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+seg("segPer",v=>{periodo=v;renderMes();});
+$("perPrev").addEventListener("click",()=>{ancla=mover(ancla,-1);renderMes();});
+$("perNext").addEventListener("click",()=>{ancla=mover(ancla,1);renderMes();});
+function inicio(d){const x=new Date(d);x.setHours(0,0,0,0);
+  if(periodo==="semana"){const w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);}
+  if(periodo==="mes")x.setDate(1);
+  if(periodo==="anio"){x.setMonth(0,1);}
+  return x;}
+function mover(d,n){const x=new Date(d);
+  if(periodo==="dia")x.setDate(x.getDate()+n);
+  else if(periodo==="semana")x.setDate(x.getDate()+7*n);
+  else if(periodo==="mes"){x.setDate(1);x.setMonth(x.getMonth()+n);}
+  else x.setFullYear(x.getFullYear()+n);
+  return x;}
+function rango(d){const a=inicio(d);const b=mover(a,1);return[a,b];}
+function ventasEntre(a,b){const ka=dayKey(a),kb=dayKey(b);const out=[];
+  Object.keys(DIAS).forEach(k=>{if(k>=ka&&k<kb)ventasDe(DIAS[k]).forEach(v=>out.push(Object.assign({_dia:k},v)));});return out;}
+function delta(id,act,ant,esDinero){const el=$(id);
+  if(!ant&&!act){el.textContent="";el.className="delta flat";return;}
+  if(!ant){el.textContent="Sin datos antes";el.className="delta flat";return;}
+  const p=Math.round((act-ant)/ant*100);
+  el.textContent=(p>0?"▲ ":p<0?"▼ ":"")+Math.abs(p)+"% vs "+({dia:"ayer",semana:"semana pasada",mes:"mes pasado",anio:"año pasado"})[periodo]+vsTxt;
+  el.className="delta "+(p>0?"up":p<0?"down":"flat");}
+function tituloPeriodo(a,b){
+  const fin=new Date(b.getTime()-864e5);
+  if(periodo==="dia")return[cap(a.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})),dayKey(a)===dayKey()?"Hoy":a.getFullYear()+""];
+  if(periodo==="semana")return[a.getDate()+" "+MESES[a.getMonth()]+" – "+fin.getDate()+" "+MESES[fin.getMonth()],(inicio(new Date()).getTime()===a.getTime()?"Esta semana · ":"")+fin.getFullYear()];
+  if(periodo==="mes")return[cap(a.toLocaleDateString("es-MX",{month:"long"})),a.getFullYear()+(monthKey(a)===monthKey()?" · Este mes":"")];
+  return[a.getFullYear()+"",a.getFullYear()===new Date().getFullYear()?"Este año":""];}
+function hbars(id,datos){const max=Math.max(0,...datos.map(d=>d[1]));
+  $(id).innerHTML=max?datos.map(([l,v,s])=>'<div class="hbar"><span>'+esc(l)+'</span><div class="trk"><div class="fil'+(v===max?' top':'')+'" style="width:'+(v/max*100)+'%"></div></div><span class="num">'+esc(s)+'</span></div>').join(""):'<p class="empty-t">Sin datos todavía</p>';}
 function renderMes(){
-  const mes=$("mesSel").value||monthKey();const[y,m]=mes.split("-").map(Number);const nD=new Date(y,m,0).getDate();
-  const porDia={},todas=[];Object.values(DIAS).filter(d=>d.mes===mes).forEach(d=>{const v=ventasDe(d);todas.push(...v);porDia[d.fecha]=resumen(v);});
-  const r=resumen(todas);const conV=Object.values(porDia).filter(x=>x.pedidos>0).length;
-  let mejor=null;Object.entries(porDia).forEach(([k,v])=>{if(!mejor||v.total>mejor[1].total)mejor=[k,v];});
-  $("rTotal").textContent=money(r.total);$("rPizzas").textContent=r.pizzas;$("rProm").textContent=money(conV?r.total/conV:0);
-  $("rMejor").textContent=mejor&&mejor[1].total?money(mejor[1].total):"—";$("rMejor").title=mejor?fechaLarga(mejor[0]):"";
-  const max=Math.max(0,...Object.values(porDia).map(x=>x.total));
-  let bars="",labs="";
-  for(let d=1;d<=nD;d++){const k=mes+"-"+pad(d),t=porDia[k]?porDia[k].total:0;
-    bars+='<div class="bar'+(t?'':' zero')+(t&&t===max?' top':'')+'" style="height:'+(t&&max?Math.max(2,t/max*100):1)+'%" title="'+d+': '+money(t)+'"></div>';
-    labs+='<span>'+(d===1||d%5===0?d:"")+'</span>';}
-  $("chart").innerHTML=bars+'<span class="peak num">máx. '+money(max)+'</span>';$("barLabels").innerHTML=labs;
+  setSeg("segPer",periodo);
+  const[a,b]=rango(ancla);const[pa,pb]=rango(mover(ancla,-1));
+  const enCurso=Date.now()<b.getTime();
+  const corte=enCurso?pa.getTime()+(Date.now()-a.getTime()):Infinity;
+  const ventas=ventasEntre(a,b),previas=ventasEntre(pa,pb).filter(v=>new Date(v.hora).getTime()<corte);
+  vsTxt=enCurso?" a estas alturas":"";
+  const r=resumen(ventas),rp=resumen(previas);
+  const[t1,t2]=tituloPeriodo(a,b);$("perTitulo").textContent=t1;$("perSub").textContent=t2;
+  $("perNext").disabled=b.getTime()>Date.now();
+  $("rTotal").textContent=money(r.total);$("rPizzas").textContent=r.pizzas;$("rPedidos").textContent=r.pedidos;
+  const prom=r.pedidos?r.total/r.pedidos:0,promA=rp.pedidos?rp.total/rp.pedidos:0;$("rProm").textContent=money(prom);
+  delta("dTotal",r.total,rp.total);delta("dPizzas",r.pizzas,rp.pizzas);delta("dPedidos",r.pedidos,rp.pedidos);delta("dProm",prom,promA);
+  const validas=ventas.filter(v=>!v.anulada);
+  // horas
+  const porHora={};validas.forEach(v=>{const h=new Date(v.hora).getHours();const x=porHora[h]||(porHora[h]={n:0,t:0});x.n++;x.t+=Number(v.total)||0;});
+  const hs=Object.keys(porHora).map(Number).sort((x,y)=>porHora[y].n-porHora[x].n);
+  $("rHora").textContent=hs.length?pad(hs[0])+":00":"—";$("rHoraS").textContent=hs.length?porHora[hs[0]].n+" pedidos":"";
+  // a tiempo
+  const ent=validas.filter(v=>v.tipo==="Domicilio"&&v.estado==="entregado"&&v.entregadoA&&v.entregaLimite);
+  const aTiempo=ent.filter(v=>new Date(v.entregadoA)<=new Date(v.entregaLimite)).length;
+  $("rTiempo").textContent=ent.length?Math.round(aTiempo/ent.length*100)+"%":"—";$("rTiempoS").textContent=ent.length?aTiempo+" de "+ent.length+" a domicilio":"Marca los entregados";
+  // clientes nuevos
+  const ka=dayKey(a),kb=dayKey(b);const nuevos=Object.values(CLIENTES).filter(c=>{const k=String(c.creado||"").slice(0,10);return k&&dayKey(new Date(c.creado))>=ka&&dayKey(new Date(c.creado))<kb;}).length;
+  const unicos=new Set(validas.filter(v=>v.cliente&&v.cliente.tel).map(v=>v.cliente.tel)).size;
+  $("rNuevos").textContent=nuevos;$("rNuevosS").textContent=unicos?unicos+" clientes pidieron":"";
+  // gráfica
+  let buckets=[];
+  if(periodo==="dia"){let hmin=12,hmax=23;const hk=Object.keys(porHora).map(Number);if(hk.length){hmin=Math.min(hmin,...hk);hmax=Math.max(hmax,...hk);}
+    for(let h=hmin;h<=hmax;h++)buckets.push([pad(h),porHora[h]?porHora[h].t:0,h%2===0||hmax-hmin<10]);
+    $("chartT").textContent="Venta por hora";}
+  else if(periodo==="anio"){const pm=Array(12).fill(0);validas.forEach(v=>pm[Number(v._dia.slice(5,7))-1]+=Number(v.total)||0);
+    buckets=pm.map((t,i)=>[MESES[i],t,true]);$("chartT").textContent="Venta por mes";}
+  else{const pd={};validas.forEach(v=>pd[v._dia]=(pd[v._dia]||0)+(Number(v.total)||0));
+    for(let d=new Date(a);d<b;d.setDate(d.getDate()+1)){const k=dayKey(d);buckets.push([periodo==="semana"?DOW[(d.getDay()+6)%7]:String(d.getDate()),pd[k]||0,periodo==="semana"||d.getDate()===1||d.getDate()%5===0]);}
+    $("chartT").textContent="Venta por día";}
+  const max=Math.max(0,...buckets.map(x=>x[1]));
+  $("chart").innerHTML=buckets.map(([l,t])=>'<div class="bar'+(t?'':' zero')+(t&&t===max?' top':'')+'" style="height:'+(t&&max?Math.max(2,t/max*100):1)+'%" title="'+esc(l)+': '+money(t)+'"></div>').join("")+'<span class="peak num">máx. '+money(max)+'</span>';
+  $("barLabels").innerHTML=buckets.map(x=>'<span>'+(x[2]?esc(x[0]):"")+'</span>').join("");
+  $("chartS").textContent=max?"":"Sin ventas en este periodo";
+  // mejor día / mes
+  if(periodo==="anio"){const bi=buckets.reduce((m,x,i)=>x[1]>buckets[m][1]?i:m,0);$("rMejorL").textContent="Mejor mes";$("rMejor").textContent=buckets[bi][1]?money(buckets[bi][1]):"—";$("rMejorS").textContent=buckets[bi][1]?cap(new Date(a.getFullYear(),bi,1).toLocaleDateString("es-MX",{month:"long"})):"";}
+  else if(periodo==="dia"){$("rMejorL").textContent="Pizza más pedida";const k=Object.keys(r.prods).filter(x=>x!=="Promo Coca"&&x!=="Orilla rellena").sort((x,y)=>r.prods[y].c-r.prods[x].c)[0];$("rMejor").textContent=k?r.prods[k].c+"":"—";$("rMejorS").textContent=k||"";}
+  else{const pd={};validas.forEach(v=>pd[v._dia]=(pd[v._dia]||0)+(Number(v.total)||0));const k=Object.keys(pd).sort((x,y)=>pd[y]-pd[x])[0];$("rMejorL").textContent="Mejor día";$("rMejor").textContent=k?money(pd[k]):"—";$("rMejorS").textContent=k?cap(fechaLarga(k)):"";}
+  // tablas
   $("rTop").innerHTML=filasProds(r.prods);$("rPago").innerHTML=filasMonto(r.pago,r.total);$("rTipo").innerHTML=filasMonto(r.tipo,r.total);
-  const cl=Object.values(r.cli).sort((a,b)=>b.t-a.t).slice(0,5);
+  const cl=Object.values(r.cli).sort((x,y)=>y.t-x.t).slice(0,5);
   $("rCli").innerHTML=cl.length?cl.map(c=>'<tr><td>'+esc(c.n)+'</td><td class="r num">'+c.p+' ped.</td><td class="r num"><b>'+money(c.t)+'</b></td></tr>').join(""):'<tr><td style="color:var(--muted)">Sin clientes registrados</td></tr>';
-  const nm=new Date(y,m-1,1).toLocaleDateString("es-MX",{month:"long",year:"numeric"});
-  resumenTxt="🌙 Pizzas Luna · "+nm+"\nVendido: "+money(r.total)+"\nPizzas: "+r.pizzas+"\nPedidos: "+r.pedidos+"\nDías con venta: "+conV+"\nPromedio por día: "+money(conV?r.total/conV:0)+"\n"+Object.keys(r.pago).map(k=>k+": "+money(r.pago[k])).join("\n");
+  // horas (no en día) y días de semana (mes/año)
+  $("cardHoras").hidden=periodo==="dia";
+  if(periodo!=="dia"){const hk=Object.keys(porHora).map(Number).sort((x,y)=>x-y);hbars("rHoras",hk.map(h=>[pad(h)+":00",porHora[h].n,porHora[h].n+" ped."]));}
+  $("cardSemana").hidden=!(periodo==="mes"||periodo==="anio");
+  if(periodo==="mes"||periodo==="anio"){const tot=Array(7).fill(0),cnt=Array(7).fill(0);const vis={};
+    validas.forEach(v=>{const[y,m,d]=v._dia.split("-").map(Number);const w=(new Date(y,m-1,d).getDay()+6)%7;tot[w]+=Number(v.total)||0;if(!vis[v._dia]){vis[v._dia]=1;cnt[w]++;}});
+    hbars("rDow",DOW.map((n,i)=>{const p=cnt[i]?tot[i]/cnt[i]:0;return[n,p,money(p)];}));}
+  // texto para WhatsApp
+  resumenTxt="🌙 *Pizzas Luna* · Reporte "+({dia:"del día",semana:"de la semana",mes:"del mes",anio:"del año"})[periodo]+"\n"+t1+(t2&&!/^(Hoy|Este|Esta)/.test(t2)?" "+t2:"")+"\n\n"+
+    "💰 Vendido: *"+money(r.total)+"*"+(rp.total?" ("+(r.total>=rp.total?"▲":"▼")+Math.abs(Math.round((r.total-rp.total)/rp.total*100))+"%)":"")+"\n"+
+    "🍕 Pizzas: "+r.pizzas+"\n🧾 Pedidos: "+r.pedidos+"\n📈 Ticket promedio: "+money(prom)+"\n"+
+    (hs.length?"⏰ Hora más fuerte: "+pad(hs[0])+":00\n":"")+(ent.length?"🛵 Entregas a tiempo: "+Math.round(aTiempo/ent.length*100)+"%\n":"")+
+    "\n"+Object.keys(r.pago).map(k=>k+": "+money(r.pago[k])).join("\n")+
+    (Object.keys(r.prods).length?"\n\nMás vendido:\n"+Object.keys(r.prods).filter(x=>x!=="Promo Coca").sort((x,y)=>r.prods[y].c-r.prods[x].c).slice(0,3).map(k=>"• "+k+": "+r.prods[k].c).join("\n"):"");
 }
 $("btnCopiar").addEventListener("click",()=>{renderMes();abrirWa("",resumenTxt);});
 
