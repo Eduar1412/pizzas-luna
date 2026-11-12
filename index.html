@@ -360,7 +360,7 @@ tr:last-child td{border-bottom:0}
     <section class="view" id="v-reportes" aria-label="Reportes">
       <div class="row" style="margin-bottom:14px;align-items:end">
         <div class="field" style="margin:0;flex:1;min-width:160px"><label for="mesSel">Mes</label><input type="month" id="mesSel"></div>
-        <button class="btn sm ghost" type="button" id="btnCopiar">Copiar resumen</button>
+        <button class="btn sm wa" type="button" id="btnCopiar">Mandar resumen por WhatsApp</button>
       </div>
       <div class="tiles">
         <div class="tile main"><small>Vendido en el mes</small><b class="num" id="rTotal">$0</b></div>
@@ -401,10 +401,10 @@ tr:last-child td{border-bottom:0}
       </div>
       <div class="card">
         <h3>Respaldo</h3>
-        <p class="hint">Todo se guarda en este teléfono. Una vez por semana toca “Descargar respaldo” y mándate el archivo por WhatsApp o guárdalo en Drive. Si cambias de teléfono, con ese archivo recuperas todo.</p>
+        <p class="hint">Todo se guarda en este teléfono. Una vez por semana toca “Guardar respaldo” y elige WhatsApp (mándatelo a ti misma) o Drive. Si cambias de teléfono, con ese archivo recuperas todo.</p>
         <p class="hint" id="ultimoResp"></p>
         <div class="row">
-          <button class="btn" type="button" id="btnRespaldo">Descargar respaldo</button>
+          <button class="btn" type="button" id="btnRespaldo">Guardar respaldo</button>
           <button class="btn ghost" type="button" id="btnCSV">Pedidos en Excel</button>
           <label class="btn ghost" for="fileImport" style="text-align:center;cursor:pointer;flex:1;min-width:140px">Restaurar respaldo</label>
           <input type="file" id="fileImport" accept="application/json,.json" hidden>
@@ -416,6 +416,7 @@ tr:last-child td{border-bottom:0}
           <li>Cuando te llegue un pedido por WhatsApp, deja el dedo sobre el mensaje y toca <b>Copiar</b>.</li>
           <li>Abre esta app y toca <b>Pegar mensaje de WhatsApp</b>. La app llena lo que entiende (pizzas, teléfono y dirección). Revisa y corrige si hace falta.</li>
           <li>Toca <b>Guardar pedido</b> y luego <b>Confirmar por WhatsApp</b>: se abre el chat del cliente con el resumen y la hora de entrega ya escritos. Solo envías.</li>
+          <li>Para mandar tus ventas: en <b>Reportes</b> toca <b>Mandar resumen por WhatsApp</b> y elige el contacto. Para el archivo completo, en <b>Ajustes</b> toca <b>Pedidos en Excel</b> y elige WhatsApp.</li>
         </ol>
       </div>
     </section>
@@ -926,7 +927,7 @@ function renderMes(){
   const nm=new Date(y,m-1,1).toLocaleDateString("es-MX",{month:"long",year:"numeric"});
   resumenTxt="🌙 Pizzas Luna · "+nm+"\nVendido: "+money(r.total)+"\nPizzas: "+r.pizzas+"\nPedidos: "+r.pedidos+"\nDías con venta: "+conV+"\nPromedio por día: "+money(conV?r.total/conV:0)+"\n"+Object.keys(r.pago).map(k=>k+": "+money(r.pago[k])).join("\n");
 }
-$("btnCopiar").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(resumenTxt);toast("Resumen copiado. Pégalo en WhatsApp.");}catch(_){toast("No se pudo copiar en este teléfono");}});
+$("btnCopiar").addEventListener("click",()=>{renderMes();abrirWa("",resumenTxt);});
 
 // ================= ajustes =================
 let draft=null;
@@ -956,15 +957,22 @@ $("btnGuardarAj").addEventListener("click",()=>{
   enCola(()=>putKV("ajustes",n)).then(()=>{aj=n;renderMenu();renderCart();toast("Extras guardados");});
 });
 // respaldo
+async function compartir(nombre,contenido,tipo,titulo){
+  try{const f=new File([contenido],nombre,{type:tipo});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:titulo,text:titulo});return true;}
+  }catch(e){if(e&&e.name==="AbortError")return false;}
+  descargar(nombre,contenido,tipo);toast("Archivo guardado en Descargas");return true;
+}
 function descargar(nombre,contenido,tipo){const u=URL.createObjectURL(new Blob([contenido],{type:tipo}));const a=document.createElement("a");a.href=u;a.download=nombre;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);}
 async function mostrarResp(){const u=await getKV("ultimoRespaldo").catch(()=>null);const el=$("ultimoResp");
   if(!u){el.textContent="Todavía no has hecho ningún respaldo.";return;}
   const d=Math.floor((Date.now()-new Date(u).getTime())/864e5);
   el.textContent="Último respaldo: "+new Date(u).toLocaleDateString("es-MX",{day:"numeric",month:"long"})+(d>=7?" · ya pasaron "+d+" días, toca hacer otro":"");
-  if(d>=7)status("Hace "+d+" días que no descargas un respaldo. Ve a Ajustes → Descargar respaldo.");}
+  if(d>=7)status("Hace "+d+" días que no guardas un respaldo. Ve a Ajustes → Guardar respaldo.");}
 $("btnRespaldo").addEventListener("click",async()=>{
-  descargar("pizzas-luna-respaldo-"+dayKey()+".json",JSON.stringify({app:"pizzas-luna",version:1,creado:new Date().toISOString(),menu,ajustes:aj,dias:Object.values(DIAS),clientes:Object.values(CLIENTES)}),"application/json");
-  await putKV("ultimoRespaldo",new Date().toISOString()).catch(()=>{});status("");mostrarResp();toast("Respaldo descargado");
+  const ok=await compartir("pizzas-luna-respaldo-"+dayKey()+".json",JSON.stringify({app:"pizzas-luna",version:1,creado:new Date().toISOString(),menu,ajustes:aj,dias:Object.values(DIAS),clientes:Object.values(CLIENTES)}),"application/json","Respaldo Pizzas Luna "+dayKey());
+  if(!ok)return;
+  await putKV("ultimoRespaldo",new Date().toISOString()).catch(()=>{});status("");mostrarResp();
 });
 $("btnCSV").addEventListener("click",()=>{
   const q=s=>'"'+String(s==null?"":s).replace(/"/g,'""')+'"';
@@ -972,7 +980,7 @@ $("btnCSV").addEventListener("click",()=>{
   Object.keys(DIAS).sort().forEach(k=>ventasDe(DIAS[k]).reverse().forEach(v=>{
     f.push([k,hhmm(new Date(v.hora)),v.folio,v.cliente&&v.cliente.nombre,v.cliente&&v.cliente.tel,v.cliente&&v.cliente.dir,v.tipo,(v.items||[]).map(i=>i.cant+"x "+nombreLinea(i)+(i.orilla?" +orilla":"")).join("; "),v.pizzas,v.descuento||0,v.total,v.pago,v.entrega,v.anulada?"Cancelado":(ESTADOS[v.estado]||ESTADOS.preparando)[0]].map(q).join(","));
   }));
-  descargar("pizzas-luna-pedidos-"+dayKey()+".csv","﻿"+f.join("\r\n"),"text/csv;charset=utf-8");toast("Archivo descargado");
+  compartir("pizzas-luna-pedidos-"+dayKey()+".csv","﻿"+f.join("\r\n"),"text/csv","Pedidos Pizzas Luna "+dayKey());
 });
 $("fileImport").addEventListener("change",async e=>{
   const file=e.target.files&&e.target.files[0];e.target.value="";if(!file)return;
