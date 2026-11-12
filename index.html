@@ -80,6 +80,13 @@ nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;top:0
 .step{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--gold-grad);color:#1a1006;font-family:var(--font-body);font-weight:800;font-size:.8rem;margin-right:8px;vertical-align:1px}
 .layout{display:grid;gap:14px;grid-template-columns:1fr}
 @media (min-width:900px){.layout{grid-template-columns:1fr 380px;align-items:start}.side{position:sticky;top:0}}
+.pegar-big{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;border-radius:18px;padding:16px 18px;margin-bottom:14px;background:linear-gradient(135deg,#25d366,#128c4a);color:#04220f;box-shadow:0 8px 26px rgba(37,211,102,.28)}
+.pegar-big .pg-ico{font-size:1.9rem;line-height:1;background:rgba(255,255,255,.35);border-radius:14px;width:52px;height:52px;display:grid;place-items:center;flex:0 0 auto}
+.pegar-big b{display:block;font-size:1.15rem;font-weight:800}
+.pegar-big small{display:block;font-weight:700;opacity:.8;font-size:.85rem}
+.pegar-big.hay{animation:latido 1.6s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+@media (prefers-reduced-motion:reduce){.pegar-big.hay{animation:none}}
 .meta-line{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .when{color:var(--muted);font-size:.9rem}
 .when b{color:var(--ink)}
@@ -318,9 +325,12 @@ tr:last-child td{border-bottom:0}
   <main id="main">
     <!-- ===== NUEVO PEDIDO ===== -->
     <section class="view on" id="v-pedido" aria-label="Nuevo pedido">
+      <button class="pegar-big" type="button" id="btnPegar">
+        <span class="pg-ico" aria-hidden="true">📋</span>
+        <span><b>Pegar pedido de WhatsApp</b><small>Copia el mensaje del cliente y toca aquí</small></span>
+      </button>
       <div class="meta-line">
         <div class="when">Pedido <b class="num" id="folioNuevo">#1</b> · <span id="ahora">—</span></div>
-        <button class="btn sm ghost" type="button" id="btnPegar">Pegar mensaje de WhatsApp</button>
       </div>
       <div class="layout">
         <div>
@@ -883,16 +893,46 @@ function favorita(tel){
 
 // ================= pegar WhatsApp =================
 $("btnPegar").addEventListener("click",async()=>{
-  $("txtPegar").value="";abrir("shPegar");
-  try{const t=await navigator.clipboard.readText();if(t)$("txtPegar").value=t;}catch(_){}
-  setTimeout(()=>$("txtPegar").focus(),50);
+  $("btnPegar").classList.remove("hay");
+  let t="";try{t=await navigator.clipboard.readText();}catch(_){}
+  if(t&&t.trim().length>3){procesarMensaje(t);return;}
+  $("txtPegar").value="";abrir("shPegar");setTimeout(()=>$("txtPegar").focus(),50);
 });
+// Android: si ya dio permiso, avisar solo cuando hay un pedido copiado
+async function revisarPortapapeles(){
+  try{if(!navigator.permissions||!navigator.clipboard)return;
+    const st=await navigator.permissions.query({name:"clipboard-read"});if(st.state!=="granted")return;
+    const t=await navigator.clipboard.readText();
+    const nuevo=t&&/pedido para pizzas luna/i.test(t)&&huella(t)!==ultimaHuella;
+    $("btnPegar").classList.toggle("hay",!!nuevo);
+    if(nuevo)$("btnPegar").querySelector("small").textContent="¡Tienes un pedido copiado! Toca para registrarlo";
+  }catch(_){}
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(revisarPortapapeles,300);});
+window.addEventListener("focus",()=>setTimeout(revisarPortapapeles,300));
+let ultimaHuella="";
+function huella(t){let x=0;const s=norm(t).replace(/\s+/g,"");for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;return String(x);}
 $("btnLeer").addEventListener("click",()=>{
   const txt=$("txtPegar").value;if(!txt.trim()){toast("Pega primero el mensaje");return;}
+  procesarMensaje(txt);
+});
+function procesarMensaje(txt){
+  const hu=huella(txt);
+  if(hu===ultimaHuella&&cart.length){cerrar("shPegar");toast("Ese pedido ya está en pantalla");return;}
+  const yaGuardado=Object.values(DIAS[dayKey()]&&DIAS[dayKey()].ventas||{}).some(v=>v.huella===hu&&!v.anulada);
+  if(yaGuardado){cerrar("shPegar");confirmar("Este mensaje ya lo registraste hoy. ¿Quieres cargarlo otra vez?","Sí, cargarlo",()=>{ultimaHuella="";cargarMensaje(txt,hu);});return;}
+  cargarMensaje(txt,hu);
+}
+function cargarMensaje(txt,hu){
+  ultimaHuella=hu;huellaActual=hu;
+  if(cart.length||$("cTel").value||$("cDir").value)limpiarForm();
   const r=leerMensaje(txt);
+  if(r.tipo){tipo=r.tipo;setSeg("segTipo",tipo);$("dirWrap").hidden=tipo!=="Domicilio";}
+  if(r.pago){pago=r.pago;setSeg("segPago",pago);$("pagaConWrap").hidden=pago!=="Efectivo";}
+  if(r.pagaCon)$("pagaCon").value=r.pagaCon;
   if(r.tel){$("cTel").value=r.tel;const c=CLIENTES[r.tel];if(c)usarCliente(c,false);}
   if(r.dir&&!$("cDir").value.trim())$("cDir").value=r.dir;
-  if(r.dir){tipo="Domicilio";setSeg("segTipo","Domicilio");$("dirWrap").hidden=false;}
+  if(r.dir&&!r.tipo){tipo="Domicilio";setSeg("segTipo","Domicilio");$("dirWrap").hidden=false;}
   if(r.nombre&&!$("cNom").value.trim())$("cNom").value=r.nombre;
   if(r.ref&&!$("cRef").value.trim())$("cRef").value=r.ref;
   r.items.forEach(([pid,n,orilla,ing])=>{const p=menu.find(x=>x.id===pid)||menu.find(x=>pid==="combinada"&&x.combinada)||menu.find(x=>pid==="coca"&&x.coca);if(!p)return;
@@ -901,11 +941,13 @@ $("btnLeer").addEventListener("click",()=>{
     if(ex)ex.cant+=n;else cart.push({key,pid:p.id,nombre:p.nombre,precio:Number(p.precio)||0,cat:p.cat||"pizza",esp:!!p.esp,coca:!!p.coca,cant:n,orilla:!!(orilla&&p.cat==="pizza"),ing:(ing||[]).slice()});
   });
   if(r.nota)$("notas").value=r.nota;
-  cerrar("shPegar");renderCart();
+  cerrar("shPegar");renderCart();validar();$("main").scrollTop=0;
   const partes=[];if(r.items.length)partes.push(r.items.reduce((s,i)=>s+i[1],0)+" productos");if(r.tel)partes.push("teléfono");if(r.dir)partes.push("dirección");
   toast(partes.length?"Encontré: "+partes.join(", ")+". Revisa antes de guardar.":"No entendí el mensaje. Llénalo a mano.");
   if(cart.some(c=>menu.some(p=>p.id===c.pid&&p.combinada)&&c.ing.length!==2))setTimeout(()=>toast("En el ticket, elige los 2 ingredientes de la combinada"),2500);
-});
+  if(r.items.length&&!$("btnGuardar").disabled)setTimeout(()=>$("btnGuardar").scrollIntoView({behavior:"smooth",block:"center"}),400);
+}
+let huellaActual="";
 function leerMensaje(txt){
   const out={items:[],tel:"",dir:"",nota:"",nombre:""};
   const tm=txt.match(/(?:\+?52[\s-]?)?(?:1[\s-]?)?(\d[\d\s-]{8,14}\d)/);
@@ -917,7 +959,13 @@ function leerMensaje(txt){
   let dirEt=etiqueta(/^\*?\s*(direcci[oó]n|domicilio)\s*\*?\s*:?/i);
   const refEt=etiqueta(/^\*?\s*referencias?\s*\*?\s*:?/i);
   out.nota=etiqueta(/^\*?\s*(nota|notas|comentarios?)\s*\*?\s*:?/i);
-  const etiquetadas=/^\*?\s*(nombre|a nombre de|direcci[oó]n|domicilio|referencias?|nota|notas|comentarios?|total|tel[eé]fono|cel)\b/i;
+  const etiquetadas=/^\*?\s*(nombre|a nombre de|direcci[oó]n|domicilio|referencias?|nota|notas|comentarios?|total|tel[eé]fono|tel|cel|whatsapp|pago|paso por ella)\b/i;
+  const tn=norm(txt);
+  if(/paso por ella|pasare por|paso a recoger|para recoger|voy por ella/.test(tn))out.tipo="Para llevar";
+  else if(/a domicilio|direccion\s*:/.test(tn))out.tipo="Domicilio";
+  const pl=etiqueta(/^\*?\s*pago\s*\*?\s*:?/i);
+  if(/tarjeta/i.test(pl))out.pago="Tarjeta";else if(/transfer/i.test(pl))out.pago="Transferencia";else if(/efectivo/i.test(pl))out.pago="Efectivo";
+  const pcm=pl.match(/con\s*\$?\s*([\d,.]+)/i);if(pcm)out.pagaCon=parseFloat(pcm[1].replace(/,/g,""))||"";
   // productos: por renglón y por pedazos separados por coma / " y "
   const ingNorm=INGREDIENTES.map(i=>[i,norm(i)]);
   const piezas=[];lineasO.filter(l=>!etiquetadas.test(l)).forEach(l=>norm(l).replace(/\*/g,"").split(/,|;|\s+y\s+(?=(?:\d|un|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b)|\s+y\s+(?=pizza|coca|refresco)|\+(?![^(]*\))/).forEach(x=>{x=x.trim();if(x)piezas.push(x);}));
@@ -972,7 +1020,7 @@ $("btnGuardar").addEventListener("click",()=>{
     items:cart.map(c=>({pid:c.pid,nombre:c.nombre,precio:c.precio,cant:c.cant,cat:c.cat,esp:c.esp,coca:c.coca,orilla:c.orilla,orillaPrecio:c.orilla?aj.orilla:0,ing:c.ing})),
     subtotal:r.sub,descuento:r.desc,total:r.total,pizzas:r.pizzas,
     entrega,entregaDe:hhmm(new Date(ahora.getTime()+a*6e4)),entregaA:hhmm(new Date(ahora.getTime()+b*6e4)),entregaLimite:new Date(ahora.getTime()+b*6e4).toISOString(),
-    pago,notas:$("notas").value.trim(),estado:"preparando",anulada:false
+    pago,notas:$("notas").value.trim(),estado:"preparando",anulada:false,huella:huellaActual||undefined
   };
   const pc=parseFloat($("pagaCon").value);if(pago==="Efectivo"&&!isNaN(pc))v.pagaCon=pc;
   const id=uid();
@@ -997,6 +1045,7 @@ $("btnGuardar").addEventListener("click",()=>{
 $("btnOkPrint").addEventListener("click",()=>{if(ultimoGuardado)imprimir(ultimoGuardado);});
 $("btnOkWa").addEventListener("click",()=>{if(ultimoGuardado)abrirWa(ultimoGuardado.cliente.tel,textoPedido(ultimoGuardado));cerrar("shOk");});
 function limpiarForm(){
+  huellaActual="";
   cart=[];["cTel","cNom","cDir","cRef","pagaCon","notas"].forEach(i=>$(i).value="");
   $("conocido").hidden=true;$("sugerencias").innerHTML="";
   tipo="Domicilio";setSeg("segTipo",tipo);$("dirWrap").hidden=false;

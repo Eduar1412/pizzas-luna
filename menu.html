@@ -95,6 +95,7 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
       <button type="button" data-v="Paso por ella" aria-pressed="false">Paso por ella</button>
     </div>
     <div class="field"><label for="nom">Tu nombre</label><input id="nom" autocomplete="name" placeholder="¿A nombre de quién?"></div>
+    <div class="field"><label for="tel">Tu teléfono (WhatsApp)</label><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 dígitos"></div>
     <div id="dirWrap">
       <div class="field"><label for="dir">Dirección</label><input id="dir" autocomplete="street-address" placeholder="Calle, número y colonia"></div>
       <div class="field"><label for="ref">Referencias</label><input id="ref" autocomplete="off" placeholder="Ej. portón negro, frente a la tienda"></div>
@@ -176,16 +177,20 @@ $("enviar").addEventListener("click",()=>{
   const falta=lines.find(l=>prods.find(p=>p.id===l.pid).comb&&l.ing.length!==2);
   if(falta){err.textContent="Elige 2 ingredientes para tu pizza combinada.";document.querySelector('[data-ing="'+lines.indexOf(falta)+'"]').scrollIntoView({behavior:"smooth",block:"center"});return;}
   if(!$("nom").value.trim()){err.textContent="Escribe tu nombre.";$("nom").focus();return;}
+  const tel=$("tel").value.replace(/\D/g,"").slice(-10);
+  if(tel.length!==10){err.textContent="Escribe tu teléfono a 10 dígitos.";$("tel").focus();return;}
   if(tipo==="Domicilio"&&$("dir").value.trim().length<5){err.textContent="Escribe tu dirección para llevarte tu pedido.";$("dir").focus();return;}
   const r=calc();const con=parseFloat($("con").value);
   const txt="🌙 *Pedido para Pizzas Luna*\n\n"+lines.map(l=>l.cant+" "+nombreL(l)+(l.orilla?" con orilla":"")).join("\n")+
-    "\n\n*Total: "+money(r.total)+"*"+(r.desc?" (con promo)":"")+"\n\nNombre: "+$("nom").value.trim()+
+    "\n\n*Total: "+money(r.total)+"*"+(r.desc?" (con promo)":"")+"\n\nNombre: "+$("nom").value.trim()+"\nTel: "+tel+
     (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
     "\nPago: "+pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"")+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
   const w=String(cfg.w||"").replace(/\D/g,"");
   const url="https://wa.me/"+(w.length===10?"52"+w:w)+"?text="+encodeURIComponent(txt);
   const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
 });
+try{const g=JSON.parse(localStorage.getItem("pl-cliente")||"null");if(g){["nom","tel","dir","ref"].forEach(k=>{if(g[k])$(k).value=g[k];});}}catch(_){}
+document.addEventListener("input",e=>{if(["nom","tel","dir","ref"].includes(e.target.id)){try{localStorage.setItem("pl-cliente",JSON.stringify({nom:$("nom").value,tel:$("tel").value,dir:$("dir").value,ref:$("ref").value}));}catch(_){}}});
 render();
 })();
 </script>
