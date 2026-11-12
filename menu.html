@@ -35,6 +35,7 @@ button{cursor:pointer}
 .hero img{width:150px;height:150px;border-radius:50%;box-shadow:0 0 40px rgba(255,170,50,.45)}
 .hero h1{font-family:var(--font-brand);font-weight:400;font-size:3.2rem;margin:8px 0 0;line-height:1}
 .hero p{color:var(--muted);margin:6px 0 0}
+.hero .hor[hidden]{display:none}
 .hero .hor{display:inline-block;margin-top:10px;font-size:.88rem;border:1px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--gold-hi)}
 .promo{margin:18px 0;border:1px dashed var(--gold-lo);border-radius:16px;padding:14px;text-align:center;background:rgba(240,187,82,.07)}
 .promo b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.25rem;color:var(--gold-hi)}
@@ -77,6 +78,12 @@ h2{font-family:var(--font-display);font-weight:400;color:var(--gold-hi);font-siz
 .done-card .resumen{text-align:left;background:#0f0b07;border-radius:12px;padding:10px 12px;font-size:.92rem;margin-bottom:14px;white-space:pre-line}
 .done-card .ok{border:0;border-radius:14px;padding:14px;width:100%;font-weight:800;font-size:1.05rem;background:var(--gold-grad);color:#1a1006}
 .alt{display:block;text-align:center;margin:10px auto 0;color:var(--muted);font-size:.85rem;background:none;border:0;text-decoration:underline;text-underline-offset:3px}
+.sug{display:grid;gap:6px;margin:-4px 0 10px}
+.sug button{text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:.95rem;display:flex;justify-content:space-between;gap:10px}
+.sug button small{color:var(--gold-hi);font-weight:800}
+.sug .otra{color:var(--muted);font-size:.85rem;justify-content:center}
+.envio{margin:-4px 0 12px;padding:10px 12px;border-radius:12px;font-weight:800;font-size:.92rem;display:flex;justify-content:space-between;gap:10px;background:rgba(111,211,138,.1);color:var(--ok);border:1px solid rgba(111,211,138,.3)}
+.envio.pend{background:rgba(240,187,82,.08);color:var(--gold-hi);border-color:var(--gold-lo)}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
 </style>
 </head>
@@ -107,7 +114,10 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
     <div class="field"><label for="nom">Tu nombre</label><input id="nom" autocomplete="name" placeholder="¿A nombre de quién?"></div>
     <div class="field"><label for="tel">Tu teléfono (WhatsApp)</label><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 dígitos"></div>
     <div id="dirWrap">
-      <div class="field"><label for="dir">Dirección</label><input id="dir" autocomplete="street-address" placeholder="Calle, número y colonia"></div>
+      <div class="field"><label for="col">Colonia</label><input id="col" autocomplete="off" placeholder="Escribe tu colonia"></div>
+      <div class="sug" id="colSug"></div>
+      <div class="envio" id="envInfo" hidden></div>
+      <div class="field"><label for="dir">Calle y número</label><input id="dir" autocomplete="street-address" placeholder="Ej. Luna 25"></div>
       <div class="field"><label for="ref">Referencias</label><input id="ref" autocomplete="off" placeholder="Ej. portón negro, frente a la tienda"></div>
     </div>
     <label class="field" style="margin-bottom:6px"><span style="font-size:.82rem;color:var(--muted);font-weight:700">¿Cómo pagas?</span></label>
@@ -141,10 +151,30 @@ const $=id=>document.getElementById(id);
 const nf=new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
 const money=n=>nf.format(Math.round(Number(n)||0));
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ENVIOS_BASE=[["Alamedas",65],["Alcali",45],["Arboledas",40],["Arcangeles",70],["Avance Popular",50],["Balcones",45],["Benito Juarez",45],["Brisas",80],["Bugambilias",45],["Cedis de Guadalajara",60],["Centro de Garcia",50],["Cerritos",70],["Colinas del Rio",45],["Cuetara",60],["El Cedral",45],["El Fraile 1 y 2",45],["El Polvo 1 y 2",45],["Emmsa",70],["Empresa Alcali",80],["Encinos",65],["Frisa",95],["Hacienda del Fraile",35],["Hacienda del Sol",45],["Heroes de Capellania",50],["Heroes de Lincoln",70],["Infonavit los Nogales",50],["Johnson Control",80],["Joyas de la Corona",60],["Joyas del Carrizal",55],["La Cruz",50],["La Martinez",45],["La Morelos",45],["La Paez",55],["Las Haciendas",40],["Las Torres",40],["Las Villas",40],["Los Nogales San Blas",60],["Mercedes",120],["Miguel Hidalgo",55],["Minas",50],["Mirador de Garcia",45],["Mirador del Fraile",45],["Nemak",140],["Nuevo Amanecer",45],["Paseo de Capellania",45],["Paseo de Lincoln",65],["Paseo del Nogal",45],["Portal de la Sierra",65],["Praderas de Lincoln",60],["Privada las Villas",40],["Privadas de Lincoln",60],["Privadas de Oasis",55],["Privalia",40],["Punta Diamante",40],["Punta Esmeralda",45],["Real de Capellanias",40],["Real de San Felipe",60],["Real de San Joaquin",65],["Real de Villas",45],["Renacimiento",65],["Rincon del Fraile",55],["Riveras de Capellanias",50],["San Blas",60],["Sierra Real",35],["Sobrevilla",45],["Sta. Elena",55],["Sta. Julia",65],["Sta. Lucia",70],["Sta. Monica",60],["Sta. Sofia",65],["Torre Luna",55],["Urbi Villa",35],["Valle de San Felipe",60],["Valle de San Jose",40],["Valles del Mirador",45],["Villa Azul",60],["Villa los Nogales",45],["Villa Nova",60],["Vista Montaña",30],["Vitro Flex",90]];
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const colKey=s=>norm(s).replace(/\bsta\.?\s*/g,"santa ").replace(/\b1\s*y\s*2\b/g," ").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
 const INGREDIENTES=["Peperoni","Hawaiana","Carnes frías","Mexicana","Italiana","Champiñones"];
 // menú por defecto; el link que comparte la pizzería trae los precios vigentes y su WhatsApp
 let cfg={w:"",h:"",o:30,pc:50,m:[["Peperoni",110,0,0,0,0],["Hawaiana",140,0,1,0,0],["Carnes frías",140,0,1,0,0],["Mexicana",140,0,1,0,0],["Champiñones",140,0,1,0,0],["Luna italiana",140,0,1,0,0],["Combinada",140,0,1,1,0],["Mixta",190,0,0,0,0],["Coca desechable 2.5 L",60,1,0,0,1]]};
 try{const hsh=location.hash.slice(1);if(hsh){const j=JSON.parse(decodeURIComponent(escape(atob(hsh.replace(/-/g,"+").replace(/_/g,"/")))));if(j&&typeof j==="object"){if(!Array.isArray(j.m))delete j.m;cfg=Object.assign(cfg,j);}}}catch(_){}
+const envios=Array.isArray(cfg.e)&&cfg.e.length?cfg.e:ENVIOS_BASE;
+const buscarColonia=n=>{const k=colKey(n);return k?envios.find(e=>colKey(e[0])===k)||null:null;};
+function detectarColonia(t){const x=" "+colKey(t)+" ";let best=null;envios.forEach(e=>{const k=colKey(e[0]);if(k.length>=4&&x.includes(" "+k+" ")&&(!best||k.length>colKey(best[0]).length))best=e;});return best;}
+function sugerir(q){const k=colKey(q);if(k.length<2)return[];const a=envios.filter(e=>colKey(e[0]).startsWith(k)),b=envios.filter(e=>!colKey(e[0]).startsWith(k)&&colKey(e[0]).includes(k));return a.concat(b).slice(0,6);}
+let colSel=null,colOtra=false;
+function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]:0;}
+function renderEnvio(){const el=$("envInfo");
+  if(tipo!=="Domicilio"||(!colSel&&!colOtra)){el.hidden=true;return;}
+  el.hidden=false;el.className="envio"+(colSel?"":" pend");
+  el.innerHTML=colSel?'<span>🛵 Envío a '+esc(colSel[0])+'</span><span class="num">'+money(colSel[1])+'</span>':'<span>🛵 Envío a tu colonia</span><span>Te confirmamos el costo</span>';}
+function elegirColonia(e,otra){colSel=e;colOtra=!!otra;if(e)$("col").value=e[0];$("colSug").innerHTML="";renderEnvio();render();}
+$("col").addEventListener("input",()=>{const q=$("col").value;const ex=buscarColonia(q);colOtra=false;
+  if(ex){elegirColonia(ex);return;}colSel=null;renderEnvio();render();
+  const s=sugerir(q);$("colSug").innerHTML=s.map(e=>'<button type="button" data-col="'+esc(e[0])+'"><span>'+esc(e[0])+'</span><small class="num">envío '+money(e[1])+'</small></button>').join("")+
+    (colKey(q).length>=3?'<button type="button" class="otra" data-otra="1">Mi colonia no aparece en la lista</button>':'');});
+$("colSug").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.col)elegirColonia(buscarColonia(b.dataset.col));else if(b.dataset.otra)elegirColonia(null,true);});
+$("dir").addEventListener("input",()=>{if(!colSel){const d=detectarColonia($("dir").value);if(d)elegirColonia(d);}});
 const prods=cfg.m.map((x,i)=>({id:"p"+i,nombre:String(x[0]),precio:Number(x[1])||0,bebida:!!x[2],esp:!!x[3],comb:!!x[4],coca:!!x[5]}));
 if(cfg.h){$("horario").textContent=cfg.h;$("horario").hidden=false;}
 const cocaP=prods.find(p=>p.coca);
@@ -166,15 +196,16 @@ function renderProds(){
 }
 function calc(){
   const P=id=>prods.find(p=>p.id===id);
-  let sub=0,esp=0,cocas=0;lines.forEach(l=>{const p=P(l.pid);sub+=(p.precio+(l.orilla?cfg.o:0))*l.cant;if(p.esp)esp+=l.cant;if(p.coca)cocas+=l.cant;});
+  let sub=0,esp=0,cocas=0;const env=envioActual();lines.forEach(l=>{const p=P(l.pid);sub+=(p.precio+(l.orilla?cfg.o:0))*l.cant;if(p.esp)esp+=l.cant;if(p.coca)cocas+=l.cant;});
   const n=Math.min(esp,cocas);const desc=cocaP&&n&&cocaP.precio>cfg.pc?n*(cocaP.precio-cfg.pc):0;
-  return{sub,desc,n,total:sub-desc};
+  return{sub,desc,n,env,total:sub-desc+env};
 }
 function nombreL(l){const p=prods.find(x=>x.id===l.pid);return p.nombre+(l.ing.length?" ("+l.ing.join(" + ")+")":"");}
 function render(){
   renderProds();const r=calc();
   $("lines").innerHTML=lines.length?lines.map(l=>{const p=prods.find(x=>x.id===l.pid);return '<div><span>'+l.cant+' × '+esc(nombreL(l))+(l.orilla?' + orilla':'')+'</span><span class="num">'+money((p.precio+(l.orilla?cfg.o:0))*l.cant)+'</span></div>';}).join("")+
-    (r.desc?'<div class="disc"><span>Promo Coca</span><span class="num">−'+money(r.desc)+'</span></div>':'')+'<div class="tot"><span>Total</span><span class="num gold-text">'+money(r.total)+'</span></div>':'<p class="hint">Agrega tus pizzas con el botón +</p>';
+    (r.desc?'<div class="disc"><span>Promo Coca</span><span class="num">−'+money(r.desc)+'</span></div>':'')+
+    (r.env?'<div><span>Envío a '+esc(colSel[0])+'</span><span class="num">'+money(r.env)+'</span></div>':(tipo==="Domicilio"&&colOtra?'<div><span>Envío</span><span>por confirmar</span></div>':''))+'<div class="tot"><span>Total</span><span class="num gold-text">'+money(r.total)+'</span></div>':'<p class="hint">Agrega tus pizzas con el botón +</p>';
   $("barTot").textContent=money(r.total);$("enviar").disabled=!lines.length;
 }
 document.addEventListener("click",e=>{
@@ -190,7 +221,7 @@ document.addEventListener("click",e=>{
     if(l.ing.includes(i))l.ing=l.ing.filter(x=>x!==i);else{if(l.ing.length>=2)l.ing.shift();l.ing.push(i);}render();}
 });
 function seg(id,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b)return;$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));cb(b.dataset.v);});}
-seg("segTipo",v=>{tipo=v;$("dirWrap").hidden=v!=="Domicilio";});
+seg("segTipo",v=>{tipo=v;$("dirWrap").hidden=v!=="Domicilio";renderEnvio();render();});
 seg("segPago",v=>{pago=v;$("conWrap").hidden=v!=="Efectivo";});
 const enLinea=!!(cfg.t&&cfg.k&&window.crypto&&crypto.subtle&&window.fetch);
 if(enLinea){$("enviar").classList.add("online");$("barTxt").textContent="Enviar mi pedido";$("porWa").hidden=!cfg.w;}
@@ -216,17 +247,18 @@ async function enviarPedido(forzarWa){
   if(!$("nom").value.trim()){err.textContent="Escribe tu nombre.";$("nom").focus();return;}
   const tel=$("tel").value.replace(/\D/g,"").slice(-10);
   if(tel.length!==10){err.textContent="Escribe tu teléfono a 10 dígitos.";$("tel").focus();return;}
-  if(tipo==="Domicilio"&&$("dir").value.trim().length<5){err.textContent="Escribe tu dirección para llevarte tu pedido.";$("dir").focus();return;}
+  if(tipo==="Domicilio"&&!colSel&&!colOtra){err.textContent="Escribe tu colonia y elígela de la lista.";$("col").focus();return;}
+  if(tipo==="Domicilio"&&$("dir").value.trim().length<3){err.textContent="Escribe tu dirección para llevarte tu pedido.";$("dir").focus();return;}
   const r=calc();const con=parseFloat($("con").value);
   const txt="🌙 *Pedido para Pizzas Luna*\n\n"+lines.map(l=>l.cant+" "+nombreL(l)+(l.orilla?" con orilla":"")).join("\n")+
     "\n\n*Total: "+money(r.total)+"*"+(r.desc?" (con promo)":"")+"\n\nNombre: "+$("nom").value.trim()+"\nTel: "+tel+
-    (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
+    (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+"\nColonia: "+$("col").value.trim()+(colSel?"\nEnvío: "+money(colSel[1]):"\nEnvío: por confirmar")+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
     "\nPago: "+pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"")+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
   const w=String(cfg.w||"").replace(/\D/g,"");
   const porWhats=()=>{const url="https://wa.me/"+(w.length===10?"52"+w:w)+"?text="+encodeURIComponent(txt);
     const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();};
   if(!enLinea||forzarWa){porWhats();return;}
-  const pedido={v:1,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",ref:tipo==="Domicilio"?$("ref").value.trim():"",
+  const pedido={v:1,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",col:tipo==="Domicilio"?$("col").value.trim():"",env:envioActual(),ref:tipo==="Domicilio"?$("ref").value.trim():"",
     pago,con:pago==="Efectivo"&&!isNaN(con)?con:"",nota:$("nota").value.trim(),total:r.total,hora:new Date().toISOString(),
     items:lines.map(l=>({n:prods.find(p=>p.id===l.pid).nombre,c:l.cant,o:l.orilla?1:0,i:l.ing}))};
   enviando=true;const btn=$("enviar");btn.disabled=true;$("barTxt").textContent="Enviando…";
@@ -234,7 +266,7 @@ async function enviarPedido(forzarWa){
     const body=await cifrar(pedido);
     const resp=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:cfg.t,message:body,title:"🍕 Nuevo pedido en línea",tags:["pizza"],priority:4})});
     if(!resp.ok)throw new Error("HTTP "+resp.status);
-    $("doneRes").textContent=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+"\n\nTotal: "+money(r.total);
+    $("doneRes").textContent=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+(r.env?"\nEnvío a "+colSel[0]+": "+money(r.env):"")+"\n\nTotal: "+money(r.total)+(tipo==="Domicilio"&&colOtra?" + envío":"");
     $("doneTxt").textContent=tipo==="Domicilio"?"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp con la hora de entrega.":"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp a qué hora pasar por él.";
     $("done").hidden=false;lines=[];render();
   }catch(e){
@@ -242,8 +274,10 @@ async function enviarPedido(forzarWa){
     $("porWa").hidden=!w;
   }finally{enviando=false;$("barTxt").textContent="Enviar mi pedido";render();}
 }
-try{const g=JSON.parse(localStorage.getItem("pl-cliente")||"null");if(g){["nom","tel","dir","ref"].forEach(k=>{if(g[k])$(k).value=g[k];});}}catch(_){}
-document.addEventListener("input",e=>{if(["nom","tel","dir","ref"].includes(e.target.id)){try{localStorage.setItem("pl-cliente",JSON.stringify({nom:$("nom").value,tel:$("tel").value,dir:$("dir").value,ref:$("ref").value}));}catch(_){}}});
+try{const g=JSON.parse(localStorage.getItem("pl-cliente")||"null");if(g){["nom","tel","dir","ref","col"].forEach(k=>{if(g[k])$(k).value=g[k];});if(g.col){const c=buscarColonia(g.col);if(c){colSel=c;}else colOtra=true;renderEnvio();}}}catch(_){}
+document.addEventListener("input",e=>{if(["nom","tel","dir","ref","col"].includes(e.target.id)){guardarCli();}});
+function guardarCli(){try{localStorage.setItem("pl-cliente",JSON.stringify({nom:$("nom").value,tel:$("tel").value,dir:$("dir").value,ref:$("ref").value,col:$("col").value}));}catch(_){}}
+$("colSug").addEventListener("click",()=>setTimeout(guardarCli,0));
 render();
 })();
 </script>

@@ -1,5 +1,5 @@
 // Guarda la app en el teléfono para que abra sin internet.
-const CACHE = "pizzas-luna-v7";
+const CACHE = "pizzas-luna-v8";
 const ARCHIVOS = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable.png", "apple-touch-icon.png", "logo.jpg"];
 
 self.addEventListener("install", (e) => {
