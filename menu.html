@@ -171,6 +171,20 @@ h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--li
 .mal{border-color:rgba(255,91,74,.5);background:rgba(255,91,74,.08)}
 .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--gold-grad);color:#1a1006;padding:11px 16px;border-radius:12px;font-weight:900;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.aviso-estado{border-radius:16px;padding:12px 14px;margin:10px 0;font-size:.92rem;border:1px solid rgba(255,91,74,.5);background:rgba(255,91,74,.1)}
+.aviso-estado.demora{border-color:rgba(255,170,60,.55);background:rgba(255,170,60,.1)}
+.aviso-estado.cerrado{border-color:rgba(140,200,255,.45);background:rgba(95,176,255,.08)}
+.aviso-estado b{display:block;font-size:1rem}
+.chip.ok{color:var(--ok);border-color:rgba(111,211,138,.45)}
+.chip.off{color:#ffb0a6;border-color:rgba(255,91,74,.45)}
+.chip.star{color:#ffd76a}
+.item.agot{opacity:.5}
+.item.agot .add{background:var(--surface-2);color:var(--muted);box-shadow:none;cursor:not-allowed}
+.badge.agot{background:#ff5b4a;color:#fff}
+select{border:1.5px solid var(--line);background:#0f0b07;border-radius:12px;padding:13px;width:100%;font-size:1rem;color:var(--ink)}
+.estrellas{display:flex;gap:6px;justify-content:center;margin:12px 0}
+.estrellas button{border:0;background:none;font-size:2.4rem;line-height:1;color:#4a3a28;padding:2px}
+.estrellas button.on{color:#ffd76a;text-shadow:0 0 12px rgba(255,215,106,.5)}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -189,6 +203,7 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0}
   <div id="repetir"></div>
   <div class="promo" id="promo"></div>
   <div class="dina" id="dina" hidden></div>
+  <div class="aviso-estado" id="avisoEstado" hidden></div>
 
   <nav class="cats" aria-label="Secciones del menú"><a href="#sec-pizzas">🍕 Pizzas</a><a href="#sec-bebidas">🥤 Bebidas</a><a href="#sec-pedido">🧾 Mi pedido</a></nav>
 
@@ -227,6 +242,12 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0}
       </div>
       <div class="field" id="conWrap"><label for="con">¿Con cuánto pagas? (para llevarte cambio)</label><input id="con" type="number" inputmode="decimal" min="0" placeholder="Ej. 500"></div>
     </div>
+    <div class="field" style="margin-bottom:6px"><label>¿Para cuándo?</label></div>
+    <div class="seg two" id="segCuando" role="group" aria-label="Para cuándo">
+      <button type="button" data-v="ya" aria-pressed="true">⚡ Lo antes posible</button>
+      <button type="button" data-v="prog" aria-pressed="false">🕗 Programar</button>
+    </div>
+    <div class="field" id="progWrap" hidden><label for="progSel">Hora de entrega</label><select id="progSel"></select></div>
     <div class="field"><label for="nota">Nota (opcional)</label><input id="nota" autocomplete="off" placeholder="Ej. bien cocida, sin cebolla"></div>
     <p class="err" id="err" role="alert"></p>
     <button type="button" class="alt" id="porWa" hidden>Prefiero mandarlo por WhatsApp</button>
@@ -258,6 +279,15 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0}
     <div class="card">
       <ol class="track" id="track"></ol>
     </div>
+    <div class="card" id="pCalifica" hidden>
+      <b style="font-size:1.1rem">¿Qué tal estuvo tu pizza? 🍕</b>
+      <div class="estrellas" id="estrellas" role="radiogroup" aria-label="Calificación">
+        <button type="button" data-e="1" aria-label="1 estrella">★</button><button type="button" data-e="2" aria-label="2 estrellas">★</button><button type="button" data-e="3" aria-label="3 estrellas">★</button><button type="button" data-e="4" aria-label="4 estrellas">★</button><button type="button" data-e="5" aria-label="5 estrellas">★</button>
+      </div>
+      <div class="field"><label for="califCom">Cuéntanos (opcional)</label><input id="califCom" maxlength="300" placeholder="¿Qué te gustó? ¿Qué mejoramos?"></div>
+      <button class="btn" type="button" id="califEnviar" disabled>Enviar calificación</button>
+    </div>
+    <div class="card" id="pGracias" hidden style="text-align:center"><b style="font-size:1.1rem">¡Gracias por calificarnos! 💛</b><div style="color:var(--muted)">Nos ayuda muchísimo.</div></div>
     <div class="card" id="pResumen"></div>
     <button class="btn ghost" type="button" id="pCerrar">Volver al menú</button>
   </div>
@@ -369,6 +399,36 @@ const nombreL=l=>P(l.pid).nombre+(l.ing&&l.ing.length?" ("+l.ing.join(" + ")+")"
 
 // ---------- dinámica ----------
 const DINA_MONTO=Number(cfg.dm)||10,DINA_TEMP=Number(cfg.dt)||10,DINA_AUTO=cfg.da!==0;
+// ---------- horario ----------
+const HR=Array.isArray(cfg.hr)&&cfg.hr.length===3?{dias:String(cfg.hr[0]).split("").map(Number),a:cfg.hr[1],c:cfg.hr[2]}:null;
+const aMin=s=>{const[x,y]=String(s).split(":").map(Number);return x*60+(y||0);};
+const DSEM=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const h12=s=>{const m=aMin(s),hh=Math.floor(m/60)%24,mm=m%60;return (hh%12||12)+(mm?":"+pad(mm):"")+(hh<12?" am":" pm");};
+function abiertoEn(d){if(!HR)return true;const a=aMin(HR.a),c=aMin(HR.c),t=d.getHours()*60+d.getMinutes(),dia=d.getDay(),ayer=(dia+6)%7;
+  if(c>a)return HR.dias.includes(dia)&&t>=a&&t<c;
+  return (HR.dias.includes(dia)&&t>=a)||(HR.dias.includes(ayer)&&t<c);}
+function proximaApertura(d){if(!HR)return null;for(let i=0;i<8;i++){const x=new Date(d);x.setDate(x.getDate()+i);x.setHours(0,0,0,0);x.setMinutes(aMin(HR.a));if(HR.dias.includes(x.getDay())&&x>d)return x;}return null;}
+function cierreDe(apertura){const a=aMin(HR.a),c=aMin(HR.c);const x=new Date(apertura);x.setHours(0,0,0,0);x.setMinutes(c>a?c:c+1440);return x;}
+function etiquetaDia(x){const hoy=new Date();const man=new Date();man.setDate(man.getDate()+1);
+  return x.toDateString()===hoy.toDateString()?"hoy":x.toDateString()===man.toDateString()?"mañana":DSEM[x.getDay()];}
+function horarios(){// opciones de hora para programar
+  const ahora=new Date(),out=[];let ini,fin;
+  if(HR){if(abiertoEn(ahora)){const ap=proximaApertura(new Date(ahora.getTime()-36e5*30))||ahora;ini=new Date(ahora.getTime()+60*6e4);
+      const a0=new Date(ahora);a0.setHours(0,0,0,0);a0.setMinutes(aMin(HR.a));if(a0>ahora)a0.setDate(a0.getDate()-1);fin=cierreDe(a0);}
+    else{ini=proximaApertura(ahora);if(!ini)return out;fin=cierreDe(ini);ini=new Date(ini.getTime()+30*6e4);}}
+  else{ini=new Date(ahora.getTime()+60*6e4);fin=new Date(ahora.getTime()+8*36e5);}
+  const t=new Date(ini);t.setSeconds(0,0);t.setMinutes(Math.ceil(t.getMinutes()/15)*15);
+  while(t<=new Date(fin.getTime()-15*6e4)&&out.length<40){out.push(new Date(t));t.setMinutes(t.getMinutes()+15);}
+  return out;}
+const fKey=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+let cuando="ya";
+// ---------- estado que manda la app (agotados, pausa, calificación) ----------
+let estadoApp=null;
+function agotadosHoy(){return estadoApp&&estadoApp.fecha===hoyKeyMenu()&&Array.isArray(estadoApp.agotados)?estadoApp.agotados.map(norm):[];}
+function esAgotado(p){return agotadosHoy().includes(norm(p.nombre));}
+function pausaHoy(){if(!estadoApp||estadoApp.fecha!==hoyKeyMenu()||!estadoApp.pausa)return{modo:"normal"};const p=estadoApp.pausa;if(p.modo==="pausa"&&p.hasta&&Date.now()>p.hasta)return{modo:"normal"};return p;}
+function hoyKeyMenu(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function soloProgramar(){return (HR&&!abiertoEn(new Date()))||pausaHoy().modo==="pausa";}
 let dinaManual=null;// lo que tu hermana activó o quitó hoy desde su app
 function hoyKey(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
 function dinaRaz(){if(dinaManual&&dinaManual.fecha===hoyKey()){if(dinaManual.modo==="off")return[];if(dinaManual.modo==="on"){const r=DINA_AUTO?razonesDinamica(DINA_TEMP):[];return r.length?r:[dinaManual.motivo||"indicación del grupo de reparto"];}}
@@ -378,9 +438,12 @@ function dinaExtra(){return tipo==="Domicilio"&&colSel&&dinaRaz().length?dinaMon
 async function leerEstado(){
   if(!cfg.t)return;
   try{const r=await fetch("https://ntfy.sh/"+cfg.t+"-estado/json?poll=1&since=12h",{cache:"no-store"});if(!r.ok)return;
-    let ult=null;(await r.text()).split("\n").filter(Boolean).forEach(l=>{try{const m=JSON.parse(l);if(m.event!=="message")return;const d=JSON.parse(m.message);if(d&&d.tipo==="dina"&&(!ult||(d.t||0)>=(ult.t||0)))ult=d;}catch(_){}});
-    const antes=JSON.stringify(dinaManual);dinaManual=ult;
-    if(JSON.stringify(dinaManual)!==antes){renderTop();renderEnvio();renderCart();}
+    let ult=null,est=null;(await r.text()).split("\n").filter(Boolean).forEach(l=>{try{const m=JSON.parse(l);if(m.event!=="message")return;const d=JSON.parse(m.message);
+      if(d&&d.tipo==="dina"&&(!ult||(d.t||0)>=(ult.t||0)))ult=d;
+      if(d&&d.tipo==="estado"&&(!est||(d.t||0)>=(est.t||0)))est=d;}catch(_){}});
+    if(est&&(!ult||(est.t||0)>=(ult.t||0))&&est.dina)ult=Object.assign({fecha:est.fecha,t:est.t},est.dina);
+    const antes=JSON.stringify([dinaManual,estadoApp]);dinaManual=ult;estadoApp=est;
+    if(JSON.stringify([dinaManual,estadoApp])!==antes){quitarAgotados();renderTop();renderEnvio();render();renderCuando();}
   }catch(_){}
 }
 function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]+dinaExtra():0;}
@@ -392,12 +455,21 @@ function calc(){let sub=0,esp=0,cocas=0;
 // ---------- pintar ----------
 function renderTop(){
   const r=dinaRaz(),ch=[];
-  if(cfg.h)ch.push('<span class="chip">🕒 '+esc(cfg.h)+'</span>');
-  ch.push('<span class="chip">⏱️ Entrega aprox. '+(r.length?"45–60":"40–55")+' min</span>');
+  const ahora=new Date(),pa=pausaHoy(),extra=pa.modo==="demora"?Number(pa.min)||30:0;
+  if(estadoApp&&estadoApp.rating&&estadoApp.rating.n>=3)ch.push('<span class="chip star">⭐ '+Number(estadoApp.rating.avg).toFixed(1)+' · '+estadoApp.rating.n+' opiniones</span>');
+  if(HR){if(abiertoEn(ahora)){const a0=new Date(ahora);a0.setHours(0,0,0,0);a0.setMinutes(aMin(HR.a));if(a0>ahora)a0.setDate(a0.getDate()-1);ch.push('<span class="chip ok">🟢 Abierto · hasta las '+h12(HR.c)+'</span>');}
+    else{const pr=proximaApertura(ahora);ch.push('<span class="chip off">🔴 Cerrado'+(pr?' · abrimos '+etiquetaDia(pr)+' '+h12(HR.a):'')+'</span>');}}
+  else if(cfg.h)ch.push('<span class="chip">🕒 '+esc(cfg.h)+'</span>');
+  if(!soloProgramar())ch.push('<span class="chip">⏱️ Entrega aprox. '+((r.length?45:40)+extra)+'–'+((r.length?60:55)+extra)+' min</span>');
   if(PREPAGO)ch.push('<span class="chip">💳 Pago por transferencia</span>');
   if(r.length)ch.push('<span class="chip sky">🛵 Dinámica de reparto hoy</span>');
   $("chips").innerHTML=ch.join("");
   $("promo").innerHTML=cocaP&&cfg.pc<cocaP.precio?'<span class="big">🍕🥤</span><span><b>Promo de la casa</b><small>Cualquier pizza de especialidad + '+esc(cocaP.nombre)+' por solo '+money(cfg.pc)+' más</small></span>':'<span class="big">🌙</span><span><b>Hecha al momento</b><small>Elige tus pizzas y te las llevamos calientitas</small></span>';
+  const av=$("avisoEstado");
+  if(pa.modo==="pausa"){av.hidden=false;av.className="aviso-estado";av.innerHTML='<b>⏸️ Estamos a tope, pausamos pedidos un momento</b>'+(pa.hasta?'Volvemos a recibir a las '+hhmm(new Date(pa.hasta))+'. ':'')+'Puedes <b style="display:inline">programar</b> tu pedido para más tarde 👇';}
+  else if(HR&&!abiertoEn(ahora)){const pr=proximaApertura(ahora);av.hidden=false;av.className="aviso-estado cerrado";av.innerHTML='<b>🌙 Ahorita estamos cerrados</b>'+(pr?'Abrimos '+etiquetaDia(pr)+' a las '+h12(HR.a)+'. ':'')+'Arma tu pedido y prográmalo, ¡te lo tenemos listo a tu hora!';}
+  else if(pa.modo==="demora"){av.hidden=false;av.className="aviso-estado demora";av.innerHTML='<b>🔥 ¡Hoy hay mucho antojo!</b>Tu pedido puede tardar unos '+extra+' minutos más de lo normal. ¡Gracias por tu paciencia!';}
+  else av.hidden=true;
   const d=$("dina");d.hidden=!r.length;
   if(r.length)d.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(dinaMonto())+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. ¡Gracias por tu comprensión! 💛';
 }
@@ -405,10 +477,11 @@ let favId=null;
 function renderProds(){
   favId=miFavorita();
   const fila=p=>{const c=cantDe(p.id),mis=lines.filter(l=>l.pid===p.id);
-    return '<article class="item'+(c?' en':'')+'" id="it-'+p.id+'"><div class="art">'+artDe(p)+'</div><div>'+
-      (p.id===favId?'<span class="badge mia">❤️ Tu favorita</span>':'')+(p.fav?'<span class="badge fire">🔥 La favorita</span>':'')+(p.comb?'<span class="badge">Elige 2</span>':p.esp?'<span class="badge">Especialidad</span>':'')+
+    const ag=esAgotado(p);
+    return '<article class="item'+(c?' en':'')+(ag?' agot':'')+'" id="it-'+p.id+'"><div class="art">'+artDe(p)+'</div><div>'+
+      (ag?'<span class="badge agot">Agotado hoy</span>':'')+(p.id===favId?'<span class="badge mia">❤️ Tu favorita</span>':'')+(p.fav?'<span class="badge fire">🔥 La favorita</span>':'')+(p.comb?'<span class="badge">Elige 2</span>':p.esp?'<span class="badge">Especialidad</span>':'')+
       '<div class="n">'+esc(p.nombre)+'</div><div class="d">'+esc(p.comb?"Elige 2: "+INGREDIENTES.join(", "):DESC[p.tipo])+'</div>'+
-      '<div class="row"><span class="p gold-text num">'+money(p.precio)+'</span><span class="qty">'+(c?'<button type="button" data-menos="'+p.id+'" aria-label="Quitar '+esc(p.nombre)+'">−</button><span class="num" id="q-'+p.id+'">'+c+'</span>':'')+'<button type="button" class="add" data-mas="'+p.id+'" aria-label="Agregar '+esc(p.nombre)+'">+</button></span></div></div>'+
+      '<div class="row"><span class="p gold-text num">'+money(p.precio)+'</span><span class="qty">'+(c?'<button type="button" data-menos="'+p.id+'" aria-label="Quitar '+esc(p.nombre)+'">−</button><span class="num" id="q-'+p.id+'">'+c+'</span>':'')+'<button type="button" class="add" data-mas="'+p.id+'" aria-label="Agregar '+esc(p.nombre)+'"'+(ag?' disabled':'')+'>+</button></span></div></div>'+
       mis.map((l,k)=>{const idx=lines.indexOf(l);let h='';
         if(p.comb)h+='<div class="extra">'+(mis.length>1?'<small>Pizza '+(k+1)+'</small>':'<small>Elige tus 2 sabores:</small>')+INGREDIENTES.map(i=>'<button type="button" class="tog" data-ing="'+idx+'" data-i="'+esc(i)+'" aria-pressed="'+l.ing.includes(i)+'">'+esc(i)+'</button>').join("")+'</div>';
         if(!p.bebida)h+='<div class="extra"><button type="button" class="tog" data-or="'+idx+'" aria-pressed="'+l.orilla+'">'+(l.orilla?'✓ ':'🧀 ')+'Orilla rellena +'+money(cfg.o)+(l.cant>1?' (las '+l.cant+')':'')+'</button></div>';
@@ -435,13 +508,23 @@ function renderBar(){
   $("barTxt").textContent=!lines.length?"Elige tus pizzas":datosVisibles?(ENLINEA?"Enviar mi pedido":"Pedir por WhatsApp"):"Continuar";
 }
 function render(){renderProds();renderCart();guardarCarrito();}
+function quitarAgotados(){const fuera=lines.filter(l=>esAgotado(P(l.pid)));if(fuera.length){lines=lines.filter(l=>!esAgotado(P(l.pid)));toast("Se nos acabó: "+[...new Set(fuera.map(l=>P(l.pid).nombre))].join(", "));}}
+// ¿para cuándo?
+function renderCuando(){const forz=soloProgramar();if(forz)cuando="prog";
+  $("segCuando").querySelectorAll("button").forEach(x=>{x.setAttribute("aria-pressed",String(x.dataset.v===cuando));if(x.dataset.v==="ya")x.disabled=forz;});
+  $("progWrap").hidden=cuando!=="prog";
+  if(cuando==="prog"){const prev=$("progSel").value;const ops=horarios();
+    $("progSel").innerHTML=ops.length?ops.map(d=>{const v=fKey(d)+" "+pad(d.getHours())+":"+pad(d.getMinutes());return '<option value="'+v+'">'+etiquetaDia(d)+" · "+h12(pad(d.getHours())+":"+pad(d.getMinutes()))+'</option>';}).join(""):'<option value="">Sin horarios disponibles</option>';
+    if(prev&&[...$("progSel").options].some(o=>o.value===prev))$("progSel").value=prev;}
+}
+$("segCuando").addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b||b.disabled)return;cuando=b.dataset.v;renderCuando();});
 function animar(pid){const q=$("q-"+pid);if(q){q.classList.remove("pop");void q.offsetWidth;q.classList.add("pop");}
   const b=$("enviar");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump");if(navigator.vibrate){try{navigator.vibrate(12);}catch(_){}}}
 
 // ---------- interacción con productos ----------
 document.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b||b.closest("#pantalla"))return;
-  if(b.dataset.mas){const p=P(b.dataset.mas);if(!p)return;
+  if(b.dataset.mas){const p=P(b.dataset.mas);if(!p)return;if(esAgotado(p)){toast("Se nos acabó por hoy 😔");return;}
     if(p.comb)lines.push({pid:p.id,orilla:false,ing:[],cant:1});
     else{const l=lines.find(x=>x.pid===p.id&&!x.orilla);if(l)l.cant++;else lines.push({pid:p.id,orilla:false,ing:[],cant:1});}
     render();animar(p.id);if(p.comb)toast("Elige los 2 sabores de tu combinada 👇");}
@@ -502,19 +585,24 @@ async function enviarPedido(forzarWa){
   if(tel.length!==10){err.textContent="Escribe tu WhatsApp a 10 dígitos.";$("tel").focus();return;}
   if(tipo==="Domicilio"&&!colSel&&!colOtra){err.textContent="Escribe tu colonia y elígela de la lista.";$("col").focus();return;}
   if(tipo==="Domicilio"&&$("dir").value.trim().length<3){err.textContent="Escribe tu calle y número.";$("dir").focus();return;}
+  if(lines.some(l=>esAgotado(P(l.pid)))){quitarAgotados();render();err.textContent="Algo de tu pedido se acabó. Revisa tu pedido.";return;}
+  if(soloProgramar())cuando="prog";
+  let prog=null;
+  if(cuando==="prog"){const v=$("progSel").value;if(!v){err.textContent="Elige a qué hora quieres tu pedido.";return;}prog={f:v.slice(0,10),h:v.slice(11)};}
   const r=calc(),con=parseFloat($("con").value),oid=rnd(10),refc="PL-"+(1000+Math.floor(Math.random()*9000));
+  const progLbl=prog?(()=>{const[y,m,d]=prog.f.split("-").map(Number);return etiquetaDia(new Date(y,m-1,d))+" "+h12(prog.h);})():"";
   const pagoTxt=PREPAGO?"Transferencia (pago antes de que lo preparen)":pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"");
   const txt="🌙 *Pedido para Pizzas Luna*\n\n"+lines.map(l=>l.cant+" "+nombreL(l)+(l.orilla?" con orilla":"")).join("\n")+
     "\n\n*Total: "+money(r.total)+"*"+(r.desc?" (con promo)":"")+"\n\nNombre: "+$("nom").value.trim()+"\nTel: "+tel+
     (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+"\nColonia: "+$("col").value.trim()+(colSel?"\nEnvío: "+money(envioActual())+(dinaExtra()?" (incluye "+money(dinaExtra())+" de dinámica)":""):"\nEnvío: por confirmar")+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
-    "\nPago: "+pagoTxt+"\nRef: "+refc+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
+    (prog?"\nProgramado: "+progLbl:"")+"\nPago: "+pagoTxt+"\nRef: "+refc+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
   const resumen=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+(r.env?"\nEnvío a "+colSel[0]+": "+money(r.env):"");
   const ult={items:lines.map(l=>({n:P(l.pid).nombre,c:l.cant,o:l.orilla?1:0,i:l.ing})),resumen:lines.map(l=>l.cant+" "+nombreL(l)).join(", "),fecha:Date.now()};
-  const activo={oid,refc,seg:null,total:r.total,hora:Date.now(),pre:PREPAGO,tipo,resumen,nombre:$("nom").value.trim(),estado:"recibido",eta:"",porWa:false};
+  const activo={oid,refc,seg:null,total:r.total,hora:Date.now(),pre:PREPAGO,tipo,resumen,nombre:$("nom").value.trim(),estado:"recibido",eta:"",porWa:false,prog:progLbl};
   if(!ENLINEA||forzarWa){
     abrirEnlace("https://wa.me/"+(W.length===10?"52"+W:W)+"?text="+encodeURIComponent(txt));
     activo.porWa=true;terminar(activo,ult);return;}
-  const pedido={v:2,oid,refc,pre:PREPAGO?1:0,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",ref:tipo==="Domicilio"?$("ref").value.trim():"",
+  const pedido={v:2,oid,refc,prog,pre:PREPAGO?1:0,nombre:$("nom").value.trim(),tel,tipo:tipo==="Domicilio"?"Domicilio":"Para llevar",dir:tipo==="Domicilio"?$("dir").value.trim():"",ref:tipo==="Domicilio"?$("ref").value.trim():"",
     col:tipo==="Domicilio"?$("col").value.trim():"",env:envioActual(),pago:PREPAGO?"Transferencia":pago,con:!PREPAGO&&pago==="Efectivo"&&!isNaN(con)?con:"",nota:$("nota").value.trim(),total:r.total,hora:new Date().toISOString(),
     items:ult.items};
   enviando=true;$("enviar").disabled=true;$("barTxt").textContent="Enviando…";
@@ -542,16 +630,26 @@ function renderPantalla(){
   const mal=a.estado==="rechazado"||a.estado==="cancelado";const esperaPago=a.pre&&a.estado==="recibido";
   $("pTit").textContent=mal?"Lo sentimos 😔":esperaPago?"¡Ya casi! Solo falta tu pago":a.estado==="entregado"?"¡Buen provecho! 🍕":"¡Tu pedido va en marcha!";
   $("pSub").textContent=mal?"No pudimos tomar tu pedido en este momento. Escríbenos por WhatsApp y con gusto te ayudamos.":
-    esperaPago?"Tu pizza entra al horno en cuanto confirmemos tu pago.":a.porWa&&!a.seg?"Te confirmamos por WhatsApp.":a.eta?"Hora aproximada: "+a.eta:"Aquí ves cómo va, se actualiza solo.";
+    esperaPago?(a.prog?"Tu pedido queda apartado para "+a.prog+" en cuanto confirmemos tu pago.":"Tu pizza entra al horno en cuanto confirmemos tu pago."):a.prog&&["recibido","pagado"].includes(a.estado)?"Programado para "+a.prog+".":a.porWa&&!a.seg?"Te confirmamos por WhatsApp.":a.eta?"Hora aproximada: "+a.eta:"Aquí ves cómo va, se actualiza solo.";
   $("pPago").hidden=!esperaPago;$("pPasos").hidden=!esperaPago||!W;
   $("pMonto").textContent=money(a.total);$("pBanco").textContent=PAGO.b;$("pCuenta").textContent=PAGO.k.replace(/(\d{4})(?=\d)/g,"$1 ");$("pTitular").textContent=PAGO.t;$("pRef").textContent=a.refc;
   $("pWa").href="https://wa.me/"+(W.length===10?"52"+W:W)+"?text="+encodeURIComponent("¡Hola! Soy "+a.nombre+". Ya pagué mi pedido "+a.refc+" por "+money(a.total)+". Te mando mi comprobante 👇");
   const ps=pasosDe(a),cur=idxEstado(a);
   $("track").innerHTML=mal?'<li class="now"><span class="pt">✖</span><span><b>Pedido no aceptado</b><small>Escríbenos por WhatsApp</small></span></li>':
     ps.map((x,i)=>'<li class="'+(i<cur||a.estado==="entregado"?"ok":i===cur?"now":"off")+'"><span class="pt">'+(i<cur||a.estado==="entregado"?"✓":x[1])+'</span><span><b>'+x[2]+'</b><small>'+(i===cur&&x[0]==="preparando"&&a.eta?"Llega aprox. "+a.eta:x[3])+'</small></span></li>').join("");
+  $("pCalifica").hidden=!(a.estado==="entregado"&&!a.calificado&&ENLINEA);$("pGracias").hidden=!(a.estado==="entregado"&&a.calificado);
   $("pResumen").innerHTML='<b>Tu pedido · '+esc(a.refc)+'</b><div style="white-space:pre-line;color:var(--muted);margin-top:6px">'+esc(a.resumen)+'</div><div style="margin-top:8px;font-weight:900">Total: '+money(a.total)+'</div>';
 }
 function abrirPantalla(){$("pantalla").hidden=false;document.body.style.overflow="hidden";renderPantalla();revisarEstado();clearInterval(poll);poll=setInterval(()=>{if(!document.hidden)revisarEstado();},10000);window.scrollTo(0,0);}
+let estrellas=0;
+$("estrellas").addEventListener("click",e=>{const b=e.target.closest("[data-e]");if(!b)return;estrellas=Number(b.dataset.e);
+  $("estrellas").querySelectorAll("button").forEach(x=>x.classList.toggle("on",Number(x.dataset.e)<=estrellas));$("califEnviar").disabled=false;});
+$("califEnviar").addEventListener("click",async()=>{const a=LS.get("pl-activo");if(!a||!estrellas)return;
+  $("califEnviar").disabled=true;$("califEnviar").textContent="Enviando…";
+  try{const body=await cifrar({tipo:"resena",oid:a.oid,refc:a.refc,estrellas,comentario:$("califCom").value.trim().slice(0,300),nombre:a.nombre});
+    const r=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:cfg.t,message:body,title:"⭐ Nueva calificación",tags:["star"]})});if(!r.ok)throw 0;
+    a.calificado=estrellas;LS.set("pl-activo",a);renderPantalla();toast("¡Gracias! 💛");}
+  catch(_){$("califEnviar").disabled=false;$("califEnviar").textContent="Enviar calificación";toast("No se pudo enviar, intenta otra vez");}});
 $("pCerrar").addEventListener("click",()=>{$("pantalla").hidden=true;document.body.style.overflow="";clearInterval(poll);renderEnCurso();});
 $("cpCuenta").addEventListener("click",()=>copiar(PAGO.k,"CLABE copiada ✓"));
 $("cpRef").addEventListener("click",()=>copiar($("pRef").textContent,"Concepto copiado ✓"));
@@ -593,7 +691,8 @@ function renderEnCurso(){
 // ---------- estrellas ----------
 {const s=$("stars");let h="";for(let i=0;i<18;i++)h+='<i style="left:'+(Math.random()*100)+'%;top:'+(Math.random()*90)+'%;animation-delay:'+(Math.random()*4).toFixed(2)+'s"></i>';s.innerHTML=h;}
 
-renderTop();renderEnvio();render();renderEnCurso();
+renderTop();renderEnvio();render();renderEnCurso();renderCuando();
+setInterval(()=>{renderTop();renderCuando();},60000);
 (async()=>{try{await leerClima();}catch(_){}renderTop();renderEnvio();renderCart();renderEnCurso();})();
 leerEstado();setInterval(()=>{if(!document.hidden)leerEstado();},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)leerEstado();});
