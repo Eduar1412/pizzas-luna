@@ -85,6 +85,8 @@ h2{font-family:var(--font-display);font-weight:400;color:var(--gold-hi);font-siz
 .sug .otra{color:var(--muted);font-size:.85rem;justify-content:center}
 .envio{margin:-4px 0 12px;padding:10px 12px;border-radius:12px;font-weight:800;font-size:.92rem;display:flex;justify-content:space-between;gap:10px;background:rgba(111,211,138,.1);color:var(--ok);border:1px solid rgba(111,211,138,.3)}
 .envio.pend{background:rgba(240,187,82,.08);color:var(--gold-hi);border-color:var(--gold-lo)}
+.dina{margin:-6px 0 18px;border-radius:16px;padding:12px 14px;text-align:center;background:rgba(95,176,255,.12);border:1px solid rgba(95,176,255,.45);color:#cfe6ff;font-size:.92rem}
+.dina b{display:block;font-size:1rem}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
 </style>
 </head>
@@ -97,6 +99,7 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0}
     <span class="hor" id="horario" hidden></span>
   </header>
   <div class="promo" id="promo"></div>
+  <div class="dina" id="dina" hidden></div>
 
   <h2>Pizzas</h2>
   <div id="pizzas"></div>
@@ -155,6 +158,27 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const ENVIOS_BASE=[["Alamedas",65],["Alcali",45],["Arboledas",40],["Arcangeles",70],["Avance Popular",50],["Balcones",45],["Benito Juarez",45],["Brisas",80],["Bugambilias",45],["Cedis de Guadalajara",60],["Centro de Garcia",50],["Cerritos",70],["Colinas del Rio",45],["Cuetara",60],["El Cedral",45],["El Fraile 1 y 2",45],["El Polvo 1 y 2",45],["Emmsa",70],["Empresa Alcali",80],["Encinos",65],["Frisa",95],["Hacienda del Fraile",35],["Hacienda del Sol",45],["Heroes de Capellania",50],["Heroes de Lincoln",70],["Infonavit los Nogales",50],["Johnson Control",80],["Joyas de la Corona",60],["Joyas del Carrizal",55],["La Cruz",50],["La Martinez",45],["La Morelos",45],["La Paez",55],["Las Haciendas",40],["Las Torres",40],["Las Villas",40],["Los Nogales San Blas",60],["Mercedes",120],["Miguel Hidalgo",55],["Minas",50],["Mirador de Garcia",45],["Mirador del Fraile",45],["Nemak",140],["Nuevo Amanecer",45],["Paseo de Capellania",45],["Paseo de Lincoln",65],["Paseo del Nogal",45],["Portal de la Sierra",65],["Praderas de Lincoln",60],["Privada las Villas",40],["Privadas de Lincoln",60],["Privadas de Oasis",55],["Privalia",40],["Punta Diamante",40],["Punta Esmeralda",45],["Real de Capellanias",40],["Real de San Felipe",60],["Real de San Joaquin",65],["Real de Villas",45],["Renacimiento",65],["Rincon del Fraile",55],["Riveras de Capellanias",50],["San Blas",60],["Sierra Real",35],["Sobrevilla",45],["Sta. Elena",55],["Sta. Julia",65],["Sta. Lucia",70],["Sta. Monica",60],["Sta. Sofia",65],["Torre Luna",55],["Urbi Villa",35],["Valle de San Felipe",60],["Valle de San Jose",40],["Valles del Mirador",45],["Villa Azul",60],["Villa los Nogales",45],["Villa Nova",60],["Vista Montaña",30],["Vitro Flex",90]];
 const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const colKey=s=>norm(s).replace(/\bsta\.?\s*/g,"santa ").replace(/\b1\s*y\s*2\b/g," ").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+// ===== dinámica de reparto: frío, lluvia o día festivo =====
+const GARCIA={lat:25.8075,lon:-100.5928};
+function nLunes(y,m,n){const d=new Date(y,m,1);return 1+(8-d.getDay())%7+(n-1)*7;}
+function festivoHoy(d){d=d||new Date();const y=d.getFullYear(),m=d.getMonth(),dd=d.getDate();
+  const L=[[0,1,"Año Nuevo"],[1,nLunes(y,1,1),"Día de la Constitución"],[2,nLunes(y,2,3),"Natalicio de Benito Juárez"],[4,1,"Día del Trabajo"],[8,16,"Día de la Independencia"],[10,nLunes(y,10,3),"Día de la Revolución"],[11,25,"Navidad"]];
+  if((y-2024)%6===0)L.push([9,1,"Cambio de Gobierno"]);
+  const f=L.find(x=>x[0]===m&&x[1]===dd);return f?f[2]:"";}
+const CODIGOS_LLUVIA=[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99];
+let clima=null;// {temp,lluvia,mojado,hora}
+async function leerClima(){
+  if(clima&&Date.now()-clima.hora<15*6e4)return clima;
+  const u="https://api.open-meteo.com/v1/forecast?latitude="+GARCIA.lat+"&longitude="+GARCIA.lon+"&current=temperature_2m,precipitation,rain,showers,weather_code&hourly=precipitation&past_hours=3&forecast_hours=1&timezone=America%2FMonterrey";
+  const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error("clima "+r.status);
+  const j=await r.json(),c=j.current||{};
+  const lluvia=(c.precipitation>0)||(c.rain>0)||(c.showers>0)||CODIGOS_LLUVIA.includes(c.weather_code);
+  const mojado=((j.hourly&&j.hourly.precipitation)||[]).reduce((s,x)=>s+(Number(x)||0),0)>=0.2;
+  clima={temp:Number(c.temperature_2m),lluvia,mojado,hora:Date.now()};return clima;
+}
+function razonesDinamica(umbral){const r=[];const f=festivoHoy();if(f)r.push("día festivo ("+f+")");
+  if(clima){if(clima.lluvia)r.push("lluvia");else if(clima.mojado)r.push("pavimento mojado");if(!isNaN(clima.temp)&&clima.temp<umbral)r.push("frío ("+Math.round(clima.temp)+"°C)");}
+  return r;}
 const INGREDIENTES=["Peperoni","Hawaiana","Carnes frías","Mexicana","Italiana","Champiñones"];
 // menú por defecto; el link que comparte la pizzería trae los precios vigentes y su WhatsApp
 let cfg={w:"",h:"",o:30,pc:50,m:[["Peperoni",110,0,0,0,0],["Hawaiana",140,0,1,0,0],["Carnes frías",140,0,1,0,0],["Mexicana",140,0,1,0,0],["Champiñones",140,0,1,0,0],["Luna italiana",140,0,1,0,0],["Combinada",140,0,1,1,0],["Mixta",190,0,0,0,0],["Coca desechable 2.5 L",60,1,0,0,1]]};
@@ -168,11 +192,17 @@ const buscarColonia=n=>{const k=colKey(n);return k?envios.find(e=>colKey(e[0])==
 function detectarColonia(t){const x=" "+colKey(t)+" ";let best=null;envios.forEach(e=>{const k=colKey(e[0]);if(k.length>=4&&x.includes(" "+k+" ")&&(!best||k.length>colKey(best[0]).length))best=e;});return best;}
 function sugerir(q){const k=colKey(q);if(k.length<2)return[];const a=envios.filter(e=>colKey(e[0]).startsWith(k)),b=envios.filter(e=>!colKey(e[0]).startsWith(k)&&colKey(e[0]).includes(k));return a.concat(b).slice(0,6);}
 let colSel=null,colOtra=false;
-function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]:0;}
+const DINA_MONTO=Number(cfg.dm)||10,DINA_TEMP=Number(cfg.dt)||10,DINA_AUTO=cfg.da!==0;
+function dinaRaz(){return DINA_AUTO?razonesDinamica(DINA_TEMP):[];}
+function dinaExtra(){return tipo==="Domicilio"&&colSel&&dinaRaz().length?DINA_MONTO:0;}
+function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]+dinaExtra():0;}
+function renderDina(){const r=dinaRaz();const el=$("dina");el.hidden=!r.length;
+  if(r.length)el.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(DINA_MONTO)+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. Tu pedido puede tardar un poquito más. ¡Gracias por tu comprensión! 💛';}
+(async()=>{try{await leerClima();}catch(_){}renderDina();renderEnvio();render();})();
 function renderEnvio(){const el=$("envInfo");
   if(tipo!=="Domicilio"||(!colSel&&!colOtra)){el.hidden=true;return;}
   el.hidden=false;el.className="envio"+(colSel?"":" pend");
-  el.innerHTML=colSel?'<span>🛵 Envío a '+esc(colSel[0])+'</span><span class="num">'+money(colSel[1])+'</span>':'<span>🛵 Envío a tu colonia</span><span>Te confirmamos el costo</span>';}
+  el.innerHTML=colSel?'<span>🛵 Envío a '+esc(colSel[0])+(dinaExtra()?' (incluye dinámica)':'')+'</span><span class="num">'+money(envioActual())+'</span>':'<span>🛵 Envío a tu colonia</span><span>Te confirmamos el costo</span>';}
 function elegirColonia(e,otra,escribiendo){colSel=e;colOtra=!!otra;if(e&&!escribiendo)$("col").value=e[0];$("colSug").innerHTML="";renderEnvio();render();}
 $("col").addEventListener("input",()=>{const q=$("col").value;const ex=buscarColonia(q);colOtra=false;
   if(ex){elegirColonia(ex,false,true);return;}colSel=null;renderEnvio();render();
@@ -210,7 +240,7 @@ function render(){
   renderProds();const r=calc();
   $("lines").innerHTML=lines.length?lines.map(l=>{const p=prods.find(x=>x.id===l.pid);return '<div><span>'+l.cant+' × '+esc(nombreL(l))+(l.orilla?' + orilla':'')+'</span><span class="num">'+money((p.precio+(l.orilla?cfg.o:0))*l.cant)+'</span></div>';}).join("")+
     (r.desc?'<div class="disc"><span>Promo Coca</span><span class="num">−'+money(r.desc)+'</span></div>':'')+
-    (r.env?'<div><span>Envío a '+esc(colSel[0])+'</span><span class="num">'+money(r.env)+'</span></div>':(tipo==="Domicilio"&&colOtra?'<div><span>Envío</span><span>por confirmar</span></div>':''))+'<div class="tot"><span>Total</span><span class="num gold-text">'+money(r.total)+'</span></div>':'<p class="hint">Agrega tus pizzas con el botón +</p>';
+    (r.env?'<div><span>Envío a '+esc(colSel[0])+'</span><span class="num">'+money(colSel[1])+'</span></div>'+(dinaExtra()?'<div style="color:#8cc8ff"><span>Dinámica de reparto</span><span class="num">+'+money(dinaExtra())+'</span></div>':''):(tipo==="Domicilio"&&colOtra?'<div><span>Envío</span><span>por confirmar</span></div>':''))+'<div class="tot"><span>Total</span><span class="num gold-text">'+money(r.total)+'</span></div>':'<p class="hint">Agrega tus pizzas con el botón +</p>';
   $("barTot").textContent=money(r.total);$("enviar").disabled=!lines.length;
 }
 document.addEventListener("click",e=>{
@@ -257,7 +287,7 @@ async function enviarPedido(forzarWa){
   const r=calc();const con=parseFloat($("con").value);
   const txt="🌙 *Pedido para Pizzas Luna*\n\n"+lines.map(l=>l.cant+" "+nombreL(l)+(l.orilla?" con orilla":"")).join("\n")+
     "\n\n*Total: "+money(r.total)+"*"+(r.desc?" (con promo)":"")+"\n\nNombre: "+$("nom").value.trim()+"\nTel: "+tel+
-    (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+"\nColonia: "+$("col").value.trim()+(colSel?"\nEnvío: "+money(colSel[1]):"\nEnvío: por confirmar")+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
+    (tipo==="Domicilio"?"\nDirección: "+$("dir").value.trim()+"\nColonia: "+$("col").value.trim()+(colSel?"\nEnvío: "+money(envioActual())+(dinaExtra()?" (incluye "+money(dinaExtra())+" de dinámica)":""):"\nEnvío: por confirmar")+($("ref").value.trim()?"\nReferencias: "+$("ref").value.trim():""):"\nPaso por ella")+
     "\nPago: "+pago+(pago==="Efectivo"&&!isNaN(con)?" (pago con "+money(con)+")":"")+($("nota").value.trim()?"\nNota: "+$("nota").value.trim():"");
   const w=String(cfg.w||"").replace(/\D/g,"");
   const porWhats=()=>{const url="https://wa.me/"+(w.length===10?"52"+w:w)+"?text="+encodeURIComponent(txt);
@@ -271,7 +301,7 @@ async function enviarPedido(forzarWa){
     const body=await cifrar(pedido);
     const resp=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:cfg.t,message:body,title:"🍕 Nuevo pedido en línea",tags:["pizza"],priority:4})});
     if(!resp.ok)throw new Error("HTTP "+resp.status);
-    $("doneRes").textContent=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+(r.env?"\nEnvío a "+colSel[0]+": "+money(r.env):"")+"\n\nTotal: "+money(r.total)+(tipo==="Domicilio"&&colOtra?" + envío":"");
+    $("doneRes").textContent=lines.map(l=>l.cant+" × "+nombreL(l)+(l.orilla?" + orilla":"")).join("\n")+(r.env?"\nEnvío a "+colSel[0]+": "+money(r.env)+(dinaExtra()?" (con dinámica)":""):"")+"\n\nTotal: "+money(r.total)+(tipo==="Domicilio"&&colOtra?" + envío":"");
     $("doneTxt").textContent=tipo==="Domicilio"?"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp con la hora de entrega.":"Tu pedido ya llegó a Pizzas Luna 🌙 En unos minutos te confirmamos por WhatsApp a qué hora pasar por él.";
     $("done").hidden=false;lines=[];render();
   }catch(e){

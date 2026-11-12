@@ -306,6 +306,14 @@ tr:last-child td{border-bottom:0}
 .cola-prox{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:.92rem}
 .cola-bar{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-bottom:10px}
 .cola-bar div{height:100%;background:var(--gold-grad)}
+.dina{border-radius:16px;padding:12px 14px;margin-bottom:14px;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,rgba(95,176,255,.18),rgba(23,17,11,.7));border:1.5px solid rgba(95,176,255,.55)}
+.dina .ico{font-size:1.8rem}
+.dina .tx{flex:1}
+.dina b{display:block;color:#bfe0ff}
+.dina small{display:block;color:var(--muted);font-size:.82rem}
+.dina.off{background:none;border:1px dashed var(--line);padding:8px 12px}
+.dina.off small{font-size:.8rem}
+.dina button{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 10px;font-weight:700;font-size:.82rem;flex:0 0 auto}
 /* Meta del día */
 .meta{padding:8px 16px 10px;border-bottom:1px solid var(--line);background:#0e0a06}
 .meta[hidden]{display:none}
@@ -370,6 +378,7 @@ tr:last-child td{border-bottom:0}
     <!-- ===== NUEVO PEDIDO ===== -->
     <section class="view on" id="v-pedido" aria-label="Nuevo pedido">
       <div id="bandeja"></div>
+      <div class="dina" id="dinaBanner" hidden></div>
       <button class="invitar-big" type="button" id="btnInvitar">📣 <span><b>Invitar clientes a pedir en línea</b><small id="invSub">Manda tu menú nuevo por WhatsApp</small></span><span class="chev" aria-hidden="true">›</span></button>
       <button class="aviso-banner" type="button" id="bannerAvisos" hidden>🔔 <span><b>Activa los avisos de pedidos</b><small>Para que te suene el celular aunque la app esté cerrada. Toma 1 minuto.</small></span></button>
       <button class="pegar-big" type="button" id="btnPegar">
@@ -617,6 +626,16 @@ tr:last-child td{border-bottom:0}
         <div id="envList" class="envlist"></div>
         <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" id="btnEnvAdd">Agregar colonia</button><button class="btn" type="button" id="btnEnvSave">Guardar precios</button></div>
       </div>
+      <div class="card">
+        <h3>Dinámica de reparto<small id="dinaEstado"></small></h3>
+        <p class="hint">Cuando hace frío, llueve o es día festivo, el grupo de reparto cobra un extra en cada envío. La app revisa el clima de García y los festivos oficiales, y lo suma sola. Si el grupo la activa otro día (por ejemplo 24 o 31 de diciembre), actívala tú con el botón.</p>
+        <div class="two">
+          <div class="field"><label for="aDinaMonto">Extra por envío</label><input id="aDinaMonto" type="number" inputmode="decimal" min="0"></div>
+          <div class="field"><label for="aDinaTemp">Frío: menos de (°C)</label><input id="aDinaTemp" type="number" inputmode="decimal"></div>
+        </div>
+        <label class="sw"><input type="checkbox" id="aDinaAuto"> Activarla sola con el clima y los festivos</label>
+        <div class="row"><button class="btn sm" type="button" id="btnDinaGuardar">Guardar</button></div>
+      </div>
       <div class="card" id="cardLinea">
         <h3>Pedidos en línea<small id="lineaEstado"></small></h3>
         <p class="hint">Tus clientes abren tu link, eligen sus pizzas y el pedido <b>te llega directo a esta app</b>, sin WhatsApp. Te aparece hasta arriba en “Nuevo” para aceptarlo.</p>
@@ -800,7 +819,7 @@ const MENU_INICIAL=[
   {id:"mixta",nombre:"Mixta",precio:190,cat:"pizza",esp:false},
   {id:"coca",nombre:"Coca desechable 2.5 L",precio:60,cat:"bebida",esp:false,coca:true}
 ];
-const AJUSTES_INICIALES={orilla:30,promoCoca:50,meta:0,whats:"",horario:"",repartidores:[],pagoEntrega:0,
+const AJUSTES_INICIALES={orilla:30,promoCoca:50,dinaMonto:10,dinaTemp:10,dinaAuto:true,meta:0,whats:"",horario:"",repartidores:[],pagoEntrega:0,
   promoMsg:"¡Hola {nombre}! 🌙 Te extrañamos en Pizzas Luna. Esta semana pide tu pizza favorita y te regalamos la orilla rellena 🍕✨ ¡Te esperamos!"};
 const ENVIOS_INICIALES=[["Alamedas",65],["Alcali",45],["Arboledas",40],["Arcangeles",70],["Avance Popular",50],["Balcones",45],["Benito Juarez",45],["Brisas",80],["Bugambilias",45],["Cedis de Guadalajara",60],["Centro de Garcia",50],["Cerritos",70],["Colinas del Rio",45],["Cuetara",60],["El Cedral",45],["El Fraile 1 y 2",45],["El Polvo 1 y 2",45],["Emmsa",70],["Empresa Alcali",80],["Encinos",65],["Frisa",95],["Hacienda del Fraile",35],["Hacienda del Sol",45],["Heroes de Capellania",50],["Heroes de Lincoln",70],["Infonavit los Nogales",50],["Johnson Control",80],["Joyas de la Corona",60],["Joyas del Carrizal",55],["La Cruz",50],["La Martinez",45],["La Morelos",45],["La Paez",55],["Las Haciendas",40],["Las Torres",40],["Las Villas",40],["Los Nogales San Blas",60],["Mercedes",120],["Miguel Hidalgo",55],["Minas",50],["Mirador de Garcia",45],["Mirador del Fraile",45],["Nemak",140],["Nuevo Amanecer",45],["Paseo de Capellania",45],["Paseo de Lincoln",65],["Paseo del Nogal",45],["Portal de la Sierra",65],["Praderas de Lincoln",60],["Privada las Villas",40],["Privadas de Lincoln",60],["Privadas de Oasis",55],["Privalia",40],["Punta Diamante",40],["Punta Esmeralda",45],["Real de Capellanias",40],["Real de San Felipe",60],["Real de San Joaquin",65],["Real de Villas",45],["Renacimiento",65],["Rincon del Fraile",55],["Riveras de Capellanias",50],["San Blas",60],["Sierra Real",35],["Sobrevilla",45],["Sta. Elena",55],["Sta. Julia",65],["Sta. Lucia",70],["Sta. Monica",60],["Sta. Sofia",65],["Torre Luna",55],["Urbi Villa",35],["Valle de San Felipe",60],["Valle de San Jose",40],["Valles del Mirador",45],["Villa Azul",60],["Villa los Nogales",45],["Villa Nova",60],["Vista Montaña",30],["Vitro Flex",90]];
 let envios=ENVIOS_INICIALES.slice();
@@ -808,6 +827,27 @@ const colKey=s=>norm(s).replace(/\bsta\.?\s*/g,"santa ").replace(/\b1\s*y\s*2\b/
 function buscarColonia(n){const k=colKey(n);return k?envios.find(e=>colKey(e[0])===k)||null:null;}
 function detectarColonia(t){const x=" "+colKey(t)+" ";let best=null;envios.forEach(e=>{const k=colKey(e[0]);if(k.length>=4&&x.includes(" "+k+" ")&&(!best||k.length>colKey(best[0]).length))best=e;});return best;}
 function sugerirColonias(q){const k=colKey(q);if(k.length<2)return[];const a=envios.filter(e=>colKey(e[0]).startsWith(k)),b=envios.filter(e=>!colKey(e[0]).startsWith(k)&&colKey(e[0]).includes(k));return a.concat(b).slice(0,6);}
+// ===== dinámica de reparto: frío, lluvia o día festivo =====
+const GARCIA={lat:25.8075,lon:-100.5928};
+function nLunes(y,m,n){const d=new Date(y,m,1);return 1+(8-d.getDay())%7+(n-1)*7;}
+function festivoHoy(d){d=d||new Date();const y=d.getFullYear(),m=d.getMonth(),dd=d.getDate();
+  const L=[[0,1,"Año Nuevo"],[1,nLunes(y,1,1),"Día de la Constitución"],[2,nLunes(y,2,3),"Natalicio de Benito Juárez"],[4,1,"Día del Trabajo"],[8,16,"Día de la Independencia"],[10,nLunes(y,10,3),"Día de la Revolución"],[11,25,"Navidad"]];
+  if((y-2024)%6===0)L.push([9,1,"Cambio de Gobierno"]);
+  const f=L.find(x=>x[0]===m&&x[1]===dd);return f?f[2]:"";}
+const CODIGOS_LLUVIA=[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99];
+let clima=null;// {temp,lluvia,mojado,hora}
+async function leerClima(){
+  if(clima&&Date.now()-clima.hora<15*6e4)return clima;
+  const u="https://api.open-meteo.com/v1/forecast?latitude="+GARCIA.lat+"&longitude="+GARCIA.lon+"&current=temperature_2m,precipitation,rain,showers,weather_code&hourly=precipitation&past_hours=3&forecast_hours=1&timezone=America%2FMonterrey";
+  const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error("clima "+r.status);
+  const j=await r.json(),c=j.current||{};
+  const lluvia=(c.precipitation>0)||(c.rain>0)||(c.showers>0)||CODIGOS_LLUVIA.includes(c.weather_code);
+  const mojado=((j.hourly&&j.hourly.precipitation)||[]).reduce((s,x)=>s+(Number(x)||0),0)>=0.2;
+  clima={temp:Number(c.temperature_2m),lluvia,mojado,hora:Date.now()};return clima;
+}
+function razonesDinamica(umbral){const r=[];const f=festivoHoy();if(f)r.push("día festivo ("+f+")");
+  if(clima){if(clima.lluvia)r.push("lluvia");else if(clima.mojado)r.push("pavimento mojado");if(!isNaN(clima.temp)&&clima.temp<umbral)r.push("frío ("+Math.round(clima.temp)+"°C)");}
+  return r;}
 const CATS_GASTO=["Ingredientes","Gas","Empaques","Repartidor","Renta","Luz y agua","Otro"];
 const INGREDIENTES=["Peperoni","Hawaiana","Carnes frías","Mexicana","Italiana","Champiñones"];
 // palabras para leer mensajes de WhatsApp
@@ -920,7 +960,14 @@ function calcular(items){
   const desc=nPromo>0&&precioCoca>aj.promoCoca?nPromo*(precioCoca-aj.promoCoca):0;
   return{sub,desc,nPromo,total:Math.round((sub-desc)*100)/100,pizzas:items.filter(c=>c.cat==="pizza").reduce((s,c)=>s+c.cant,0)};
 }
-function envioForm(){if(tipo!=="Domicilio")return 0;const v=parseFloat($("cEnv").value);return v>0?Math.round(v*100)/100:0;}
+let dinaHoy={fecha:"",modo:"auto"};
+function dinaModo(){return dinaHoy.fecha===dayKey()?dinaHoy.modo:"auto";}
+function dinaRazones(){return razonesDinamica(Number(aj.dinaTemp)||10);}
+function dinaActiva(){const m=dinaModo();if(m==="on")return true;if(m==="off")return false;return aj.dinaAuto!==false&&dinaRazones().length>0;}
+function dinaMotivo(){const r=dinaRazones();return r.length?r.join(", "):"activada a mano";}
+function envioBase(){if(tipo!=="Domicilio")return 0;const v=parseFloat($("cEnv").value);return v>0?Math.round(v*100)/100:0;}
+function envioExtra(){return envioBase()&&dinaActiva()?Number(aj.dinaMonto)||0:0;}
+function envioForm(){return envioBase()+envioExtra();}
 function totalForm(){return Math.round((calcular(cart).total+envioForm())*100)/100;}
 function ponerColonia(e,silencioso){if(!e)return;$("cCol").value=e[0];$("cEnv").value=e[1];$("colSug").innerHTML="";renderCart();if(!silencioso)toast("Envío a "+e[0]+": "+money(e[1]));}
 $("cCol").addEventListener("input",()=>{const q=$("cCol").value;const ex=buscarColonia(q);
@@ -945,7 +992,8 @@ function renderCart(){
   $("totals").innerHTML=cart.length?
     '<div><span>Subtotal</span><span class="num">'+money(r.sub)+'</span></div>'+
     (r.desc?'<div class="disc"><span>Promo Coca ('+r.nPromo+')</span><span class="num">−'+money(r.desc)+'</span></div>':'')+
-    (envioForm()?'<div><span>Envío'+($("cCol").value.trim()?' · '+esc($("cCol").value.trim()):'')+'</span><span class="num">'+money(envioForm())+'</span></div>':'')+
+    (envioBase()?'<div><span>Envío'+($("cCol").value.trim()?' · '+esc($("cCol").value.trim()):'')+'</span><span class="num">'+money(envioBase())+'</span></div>':'')+
+    (envioExtra()?'<div style="color:#8cc8ff"><span>Dinámica de reparto ('+esc(dinaMotivo())+')</span><span class="num">+'+money(envioExtra())+'</span></div>':'')+
     '<div class="grand"><span>Total</span><b class="num gold-text">'+money(totalForm())+'</b></div>':'';
   $("btnGuardar").textContent=cart.length?"Guardar pedido · "+money(totalForm()):"Guardar pedido";
   renderMenu();renderCambio();validar();
@@ -1126,7 +1174,7 @@ function textoPedido(v){
   const l=v.items.map(i=>"• "+i.cant+" "+nombreLinea(i)+(i.orilla?" con orilla rellena":"")).join("\n");
   return "¡Hola"+(v.cliente&&v.cliente.nombre?" "+v.cliente.nombre.split(" ")[0]:"")+"! 🌙 *Pizzas Luna* confirma tu pedido #"+v.folio+":\n\n"+l+
     (v.descuento?"\n• Promo Coca: −"+money(v.descuento):"")+
-    (v.envio?"\n• Envío"+(v.envio.colonia?" a "+v.envio.colonia:"")+": "+money(v.envio.monto):"")+
+    (v.envio?"\n• Envío"+(v.envio.colonia?" a "+v.envio.colonia:"")+": "+money(v.envio.monto)+(v.envio.extra?" (incluye "+money(v.envio.extra)+" de dinámica de reparto por "+v.envio.motivo+")":""):"")+
     "\n\n*Total: "+money(v.total)+"*\nPago: "+v.pago+(v.pagaCon?" (con "+money(v.pagaCon)+", cambio "+money(v.pagaCon-v.total)+")":"")+
     (v.tipo==="Domicilio"?"\nEntrega aprox.: "+v.entregaDe+" – "+v.entregaA+" ("+v.entrega+" min)\nDirección: "+v.cliente.dir+(v.cliente.ref?" ("+v.cliente.ref+")":""):
      v.tipo==="Para llevar"?"\nLista para recoger aprox.: "+v.entregaDe+" – "+v.entregaA:"")+
@@ -1141,7 +1189,7 @@ $("btnGuardar").addEventListener("click",()=>{
   const v={
     folio:folioSiguiente(key),hora:ahora.toISOString(),tipo,
     cliente:{tel:tel.length===10?tel:"",nombre:$("cNom").value.trim(),dir:tipo==="Domicilio"?$("cDir").value.trim():"",ref:tipo==="Domicilio"?$("cRef").value.trim():"",colonia:tipo==="Domicilio"?$("cCol").value.trim():""},
-    envio:envioForm()?{colonia:$("cCol").value.trim(),monto:envioForm()}:undefined,
+    envio:envioForm()?{colonia:$("cCol").value.trim(),monto:envioForm(),base:envioBase(),extra:envioExtra()||undefined,motivo:envioExtra()?dinaMotivo():undefined}:undefined,
     items:cart.map(c=>({pid:c.pid,nombre:c.nombre,precio:c.precio,cant:c.cant,cat:c.cat,esp:c.esp,coca:c.coca,orilla:c.orilla,orillaPrecio:c.orilla?aj.orilla:0,ing:c.ing})),
     subtotal:r.sub,descuento:r.desc,total:Math.round((r.total+envioForm())*100)/100,pizzas:r.pizzas,
     entrega,entregaDe:hhmm(new Date(ahora.getTime()+a*6e4)),entregaA:hhmm(new Date(ahora.getTime()+b*6e4)),entregaLimite:new Date(ahora.getTime()+b*6e4).toISOString(),
@@ -1175,7 +1223,7 @@ function limpiarForm(){
   $("conocido").hidden=true;$("sugerencias").innerHTML="";
   tipo="Domicilio";setSeg("segTipo",tipo);$("dirWrap").hidden=false;
   pago="Efectivo";setSeg("segPago",pago);$("pagaConWrap").hidden=false;
-  entrega="40/45";setSeg("segEntrega",entrega);
+  entrega=dinaActiva()?"45/50":"40/45";setSeg("segEntrega",entrega);
   renderCart();$("folioNuevo").textContent="#"+folioSiguiente(dayKey());
 }
 
@@ -1193,7 +1241,8 @@ function resumen(ventas){
       const k=i.nombre;const p=r.prods[k]||(r.prods[k]={c:0,i:0});p.c+=q;p.i+=q*((Number(i.precio)||0)+(Number(i.orillaPrecio)||0));
       if(i.orilla){const o=r.prods["Orilla rellena"]||(r.prods["Orilla rellena"]={c:0,i:0});o.c+=q;o.i+=q*(Number(i.orillaPrecio)||0);p.i-=q*(Number(i.orillaPrecio)||0);}
     });
-    if(v.envio&&v.envio.monto){const p=r.prods["Envíos a domicilio"]||(r.prods["Envíos a domicilio"]={c:0,i:0});p.c+=1;p.i+=Number(v.envio.monto)||0;}
+    if(v.envio&&v.envio.monto){const ex=Number(v.envio.extra)||0;const p=r.prods["Envíos a domicilio"]||(r.prods["Envíos a domicilio"]={c:0,i:0});p.c+=1;p.i+=(Number(v.envio.monto)||0)-ex;
+      if(ex){const d=r.prods["Dinámica de reparto"]||(r.prods["Dinámica de reparto"]={c:0,i:0});d.c+=1;d.i+=ex;}}
     if(v.descuento){const p=r.prods["Promo Coca"]||(r.prods["Promo Coca"]={c:0,i:0});p.c+=1;p.i-=v.descuento;}
   });return r;
 }
@@ -1431,6 +1480,7 @@ let draft=null;
 function renderAjustes(){
   if(!draft)draft=JSON.parse(JSON.stringify(menu));
   $("aOrilla").value=aj.orilla;$("aPromo").value=aj.promoCoca;
+  $("aDinaMonto").value=aj.dinaMonto;$("aDinaTemp").value=aj.dinaTemp;$("aDinaAuto").checked=aj.dinaAuto!==false;
   $("aWhats").value=aj.whats||"";$("aMeta").value=aj.meta||"";$("aHorario").value=aj.horario||"";$("aPagoEnt").value=aj.pagoEntrega||"";
   $("aPromoMsg").value=aj.promoMsg||AJUSTES_INICIALES.promoMsg;
   if(!repDraft)repDraft=(aj.repartidores||[]).slice();renderRepList();renderEnvios();
@@ -1494,6 +1544,7 @@ function linkMenu(){
   if(Number(aj.promoCoca)!==50)data.pc=aj.promoCoca;
   if(JSON.stringify(m)!==MENU_BASE_LINK)data.m=m;
   if(linea){data.t=linea.topic;data.k=linea.pub;}
+  if(Number(aj.dinaMonto)!==10)data.dm=aj.dinaMonto;if(Number(aj.dinaTemp)!==10)data.dt=aj.dinaTemp;if(aj.dinaAuto===false)data.da=0;
   {const base={};ENVIOS_INICIALES.forEach(e=>base[colKey(e[0])]=e);const act={};envios.forEach(e=>act[colKey(e[0])]=e);
    const cambios=envios.filter(e=>{const b=base[colKey(e[0])];return !b||b[1]!==e[1]||b[0]!==e[0];});
    const quitadas=ENVIOS_INICIALES.filter(e=>!act[colKey(e[0])]).map(e=>e[0]);
@@ -1554,7 +1605,7 @@ function imprimir(v){
     (v.cliente&&(v.cliente.nombre||v.cliente.tel)?'<hr><div><b>'+esc(v.cliente.nombre||"")+'</b> '+esc(v.cliente.tel||"")+'</div>':'')+
     (v.cliente&&v.cliente.dir?'<div>'+esc(v.cliente.dir)+(v.cliente.ref?' ('+esc(v.cliente.ref)+')':'')+'</div>':'')+'<hr>'+
     v.items.map(i=>L(esc(i.cant+" "+nombreLinea(i)),money((i.precio)*i.cant))+(i.orilla?L("  + orilla x"+i.cant,money(i.orillaPrecio*i.cant)):"")).join("")+
-    (v.descuento?L("Promo Coca","-"+money(v.descuento)):"")+(v.envio?L("Envío "+esc(v.envio.colonia||""),money(v.envio.monto)):"")+'<hr>'+'<div class="it tot"><span>TOTAL</span><span>'+money(v.total)+'</span></div>'+
+    (v.descuento?L("Promo Coca","-"+money(v.descuento)):"")+(v.envio?L("Envío "+esc(v.envio.colonia||""),money(v.envio.base!=null?v.envio.base:v.envio.monto))+(v.envio.extra?L("Dinámica reparto",money(v.envio.extra)):""):"")+'<hr>'+'<div class="it tot"><span>TOTAL</span><span>'+money(v.total)+'</span></div>'+
     '<div>Pago: '+esc(v.pago)+(v.pagaCon?' · con '+money(v.pagaCon)+' · cambio '+money(v.pagaCon-v.total):'')+'</div>'+
     (v.notas?'<hr><div>Nota: '+esc(v.notas)+'</div>':'')+'<hr><div class="c">¡Gracias por tu preferencia!</div><br>';
   const img=$("print").querySelector("img");
@@ -1659,13 +1710,13 @@ function renderBandeja(){
   bd.hidden=!pend.length;bd.textContent=pend.length;
   $("bandeja").innerHTML=pend.length?'<section class="inbox" aria-live="polite"><h3><span>'+(pend.length===1?"Pedido en línea nuevo":pend.length+" pedidos en línea nuevos")+'</span><span class="dot" aria-hidden="true"></span></h3>'+
     pend.map(b=>{const o=b.o,its=itemsLinea(o);
-      const ec=o.tipo!=="Para llevar"?((o.col&&buscarColonia(o.col))||detectarColonia(o.dir||"")):null;const env=ec?ec[1]:0;
+      const ec=o.tipo!=="Para llevar"?((o.col&&buscarColonia(o.col))||detectarColonia(o.dir||"")):null;const env=ec?ec[1]+(dinaActiva()?Number(aj.dinaMonto)||0:0):0;
       return '<article class="olinea"><div class="top"><b>'+esc(o.nombre||"Cliente")+'</b><span class="num gold-text">'+money(calcular(its).total+env)+'</span></div>'+
       '<small class="num">'+hhmm(new Date(b.recibido))+' · '+esc(o.tipo==="Para llevar"?"Pasa por ella":"A domicilio")+' · '+esc(o.pago||"")+(o.tel?' · '+esc(o.tel):'')+'</small>'+
       '<div>'+its.map(i=>esc(i.cant+" × "+nombreLinea(i)+(i.orilla?" + orilla":""))).join("<br>")+'</div>'+
       (Number(o.total)&&Math.abs(Number(o.total)-(calcular(its).total+env))>0.5?'<small style="color:#ffb08a;font-weight:700">⚠️ El cliente vio '+money(o.total)+' (su link tiene precios viejos). Confírmale el total.</small>':'')+
       (its.length<(o.items||[]).length?'<small style="color:#ffb08a;font-weight:700">⚠️ Pidió algo que ya no está en tu menú: '+esc((o.items||[]).filter(it=>!menu.find(x=>norm(x.nombre)===norm(it.n)||norm(it.n).includes(norm(x.nombre)))).map(it=>it.c+" "+it.n).join(", "))+'</small>':'')+
-      (o.dir?'<small>📍 '+esc(o.dir)+(o.col?', '+esc(o.col):'')+(o.ref?' · '+esc(o.ref):'')+'</small>':'')+(ec?'<small>🛵 Envío a '+esc(ec[0])+': '+money(env)+'</small>':(o.col&&o.tipo!=="Para llevar"?'<small>🛵 Colonia fuera del tabulador: pon el envío a mano</small>':''))+(o.nota?'<small>📝 '+esc(o.nota)+'</small>':'')+
+      (o.dir?'<small>📍 '+esc(o.dir)+(o.col?', '+esc(o.col):'')+(o.ref?' · '+esc(o.ref):'')+'</small>':'')+(ec?'<small>🛵 Envío a '+esc(ec[0])+': '+money(env)+(dinaActiva()?' (incluye dinámica)':'')+'</small>':(o.col&&o.tipo!=="Para llevar"?'<small>🛵 Colonia fuera del tabulador: pon el envío a mano</small>':''))+(o.nota?'<small>📝 '+esc(o.nota)+'</small>':'')+
       '<div class="acts"><button class="btn ghost" type="button" data-rech="'+esc(b.id)+'">Rechazar</button><button class="btn" type="button" data-acep="'+esc(b.id)+'">Aceptar</button></div></article>';}).join("")+'</section>':"";
 }
 $("bandeja").addEventListener("click",e=>{
@@ -1694,6 +1745,33 @@ function aceptarLinea(b){
 setInterval(()=>{if(!document.hidden)revisarLinea();},20000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)revisarLinea();});
 window.addEventListener("online",revisarLinea);
+
+// ===== dinámica: pantalla =====
+function renderDina(){
+  const act=dinaActiva(),modo=dinaModo(),el=$("dinaBanner");
+  const ico=clima&&clima.lluvia?"🌧️":clima&&clima.mojado?"💧":dinaRazones().some(r=>r.startsWith("frío"))?"🥶":festivoHoy()?"🇲🇽":"🛵";
+  el.hidden=false;el.className="dina"+(act?"":" off");
+  el.innerHTML=act?'<span class="ico">'+ico+'</span><span class="tx"><b>Dinámica de reparto activa: +'+money(aj.dinaMonto)+' por envío</b><small>'+esc(cap(dinaMotivo()))+(clima&&!isNaN(clima.temp)?' · '+Math.round(clima.temp)+'°C en García':'')+' · Dale más tiempo a la entrega</small></span><button type="button" id="dinaOff">Quitar hoy</button>':
+    '<span class="tx"><small>'+(clima&&!isNaN(clima.temp)?"🌡️ "+Math.round(clima.temp)+"°C en García, sin lluvia. ":"")+'¿El grupo de reparto activó la dinámica hoy?</small></span><button type="button" id="dinaOn">Activar hoy</button>';
+  if(modo==="off")el.querySelector("small").textContent="Quitaste la dinámica hoy. ";
+  $("dinaEstado").textContent=act?"Activa hoy ("+dinaMotivo()+")":"Hoy no está activa";
+}
+$("dinaBanner").addEventListener("click",async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  dinaHoy={fecha:dayKey(),modo:b.id==="dinaOn"?"on":(dinaRazones().length&&aj.dinaAuto!==false?"off":"auto")};
+  await putKV("dinaHoy",dinaHoy);renderDina();renderCart();renderBandeja();
+  if(dinaActiva()&&!cart.length){entrega="45/50";setSeg("segEntrega",entrega);}
+  toast(dinaActiva()?"Dinámica activada: +"+money(aj.dinaMonto)+" en cada envío de hoy":"Dinámica quitada por hoy");
+});
+$("btnDinaGuardar").addEventListener("click",()=>guardarAj({dinaMonto:Math.max(0,parseFloat($("aDinaMonto").value)||0),dinaTemp:parseFloat($("aDinaTemp").value)||10,dinaAuto:$("aDinaAuto").checked},"Dinámica guardada").then(()=>{renderDina();renderCart();}));
+async function revisarClima(){
+  const antes=dinaActiva();
+  try{await leerClima();}catch(_){}
+  renderDina();renderCart();renderBandeja();
+  if(!antes&&dinaActiva()){toast("🛵 Dinámica de reparto activa hoy: "+dinaMotivo());if(!cart.length){entrega="45/50";setSeg("segEntrega",entrega);}}
+}
+setInterval(()=>{if(!document.hidden)revisarClima();},15*6e4);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(!clima||Date.now()-clima.hora>15*6e4))revisarClima();});
 
 // ================= caja =================
 let gCat="Ingredientes";
@@ -1813,7 +1891,8 @@ $("fileImport").addEventListener("change",async e=>{
     const a=await getKV("ajustes");if(a)aj=Object.assign({},AJUSTES_INICIALES,a);
     linea=await getKV("linea")||null;bandeja=await getKV("bandeja")||[];
     {const ev=await getKV("envios");if(Array.isArray(ev))envios=ev;}
-    renderMenu();renderCart();refrescarHoy();mostrarResp();renderLinea();renderBandeja();revisarLinea();
+    {const dh=await getKV("dinaHoy");if(dh)dinaHoy=dh;}
+    renderMenu();renderCart();refrescarHoy();mostrarResp();renderLinea();renderBandeja();revisarLinea();renderDina();revisarClima();
     if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
   }catch(err){console.error(err);status("Este navegador no deja guardar datos (¿modo incógnito?). Abre la app en Chrome normal.");}
 })();
