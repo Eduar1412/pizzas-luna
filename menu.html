@@ -53,11 +53,21 @@ h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--li
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
 .promo{margin:18px 0 6px;border-radius:18px;padding:14px 16px;display:flex;gap:14px;align-items:center;background:linear-gradient(120deg,rgba(255,215,120,.16),rgba(255,106,43,.1),rgba(255,215,120,.16));background-size:200% 100%;animation:brillo 6s linear infinite;border:1px solid var(--gold-lo)}
 @keyframes brillo{to{background-position:-200% 0}}
-.promo .big{font-size:2rem}
+.promo .big{font-size:2rem;white-space:nowrap}
 .promo b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.15rem;color:var(--gold-hi)}
 .promo small{color:var(--ink);opacity:.85}
 .dina{border-radius:16px;padding:12px 14px;margin:10px 0;background:rgba(95,176,255,.1);border:1px solid rgba(95,176,255,.4);color:#cfe6ff;font-size:.9rem}
 .dina b{display:block}
+.otra-vez{margin-top:14px;border:1.5px solid var(--gold);border-radius:20px;padding:16px;background:linear-gradient(150deg,rgba(255,215,120,.16),rgba(23,17,11,.7));box-shadow:0 8px 26px rgba(240,170,60,.15)}
+.ov-t{font-size:.95rem}
+.ov-t b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.3rem;color:var(--gold-hi);margin-top:2px}
+.ov-items{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.ov-items span{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:.85rem;font-weight:700}
+.ov-acts{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ov-acts b{font-size:1.3rem}
+.ov-acts small{color:var(--muted)}
+.ov-acts button{border:0;border-radius:14px;padding:12px 16px;font-weight:900;background:var(--gold-grad);color:#1a1006;box-shadow:0 4px 14px rgba(240,170,60,.35)}
+.ov-no{display:block;margin:10px auto 0;background:none;border:0;color:var(--muted);font-size:.85rem;text-decoration:underline;text-underline-offset:3px}
 .repetir{display:flex;gap:12px;align-items:center;margin-top:14px;border:1.5px dashed var(--gold);border-radius:16px;padding:12px 14px;background:rgba(240,187,82,.06)}
 .repetir .tx{flex:1;font-size:.9rem}
 .repetir b{color:var(--gold-hi);display:block}
@@ -77,6 +87,7 @@ h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--li
 .item .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .item .p{font-weight:900;font-size:1.2rem}
 .badge{display:inline-block;font-size:.66rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#1a1006;background:var(--gold-grad);padding:2px 7px;border-radius:6px;margin:0 6px 4px 0}
+.badge.mia{background:linear-gradient(135deg,#ff9ab0,#e2456a);color:#fff}
 .badge.fire{background:linear-gradient(135deg,#ffb36b,#ff6a2b);color:#fff}
 .qty{display:flex;align-items:center;gap:8px}
 .qty button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);font-weight:900;font-size:1.25rem;line-height:1}
@@ -307,6 +318,8 @@ const DESC={pep:"Peperoni dorado y mucho queso",haw:"Jamón con piña, dulce y s
 const FAV=(Array.isArray(cfg.f)?cfg.f:[]).map(norm);
 const prods=cfg.m.map((x,i)=>{const n=String(x[0]);return{id:"p"+i,nombre:n,precio:Number(x[1])||0,bebida:!!x[2],esp:!!x[3],comb:!!x[4],coca:!!x[5],tipo:tipoDe(n),fav:FAV.includes(norm(n))};});
 const P=id=>prods.find(p=>p.id===id);
+function miFavorita(){const c={};(LS.get("pl-historial")||[]).forEach(h=>(h.items||[]).forEach(it=>{const p=prods.find(x=>norm(x.nombre)===norm(it.n));if(p&&!p.bebida)c[p.id]=(c[p.id]||0)+(Number(it.c)||1);}));
+  const k=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];return k&&(LS.get("pl-historial")||[]).length>=2?k:null;}
 const cocaP=prods.find(p=>p.coca);
 const PREPAGO=Number(cfg.pp)===1;
 const PAGO={k:String(cfg.pk||"722969010071057611"),b:cfg.pb||"Mercado Pago",t:cfg.pt||"Mónica Luna"};
@@ -373,7 +386,7 @@ async function leerEstado(){
 function envioActual(){return tipo==="Domicilio"&&colSel?colSel[1]+dinaExtra():0;}
 function calc(){let sub=0,esp=0,cocas=0;
   lines.forEach(l=>{const p=P(l.pid);sub+=(p.precio+(l.orilla?Number(cfg.o):0))*l.cant;if(p.esp)esp+=l.cant;if(p.coca)cocas+=l.cant;});
-  const n=Math.min(esp,cocas),desc=cocaP&&n&&cocaP.precio>cfg.pc?n*(cocaP.precio-cfg.pc):0,env=envioActual();
+  const n=Math.min(esp,cocas),desc=cocaP&&n&&cocaP.precio>cfg.pc?n*(cocaP.precio-cfg.pc):0,env=lines.length?envioActual():0;
   return{sub,desc,env,esp,cocas,total:sub-desc+env,cnt:lines.reduce((s,l)=>s+l.cant,0)};}
 
 // ---------- pintar ----------
@@ -388,10 +401,12 @@ function renderTop(){
   const d=$("dina");d.hidden=!r.length;
   if(r.length)d.innerHTML='<b>🛵 Hoy hay dinámica de reparto: +'+money(dinaMonto())+' al envío</b>Por '+esc(r.join(", "))+'. Es para apoyar a nuestros repartidores, que hoy manejan con más cuidado. ¡Gracias por tu comprensión! 💛';
 }
+let favId=null;
 function renderProds(){
+  favId=miFavorita();
   const fila=p=>{const c=cantDe(p.id),mis=lines.filter(l=>l.pid===p.id);
     return '<article class="item'+(c?' en':'')+'" id="it-'+p.id+'"><div class="art">'+artDe(p)+'</div><div>'+
-      (p.fav?'<span class="badge fire">🔥 La favorita</span>':'')+(p.comb?'<span class="badge">Elige 2</span>':p.esp?'<span class="badge">Especialidad</span>':'')+
+      (p.id===favId?'<span class="badge mia">❤️ Tu favorita</span>':'')+(p.fav?'<span class="badge fire">🔥 La favorita</span>':'')+(p.comb?'<span class="badge">Elige 2</span>':p.esp?'<span class="badge">Especialidad</span>':'')+
       '<div class="n">'+esc(p.nombre)+'</div><div class="d">'+esc(p.comb?"Elige 2: "+INGREDIENTES.join(", "):DESC[p.tipo])+'</div>'+
       '<div class="row"><span class="p gold-text num">'+money(p.precio)+'</span><span class="qty">'+(c?'<button type="button" data-menos="'+p.id+'" aria-label="Quitar '+esc(p.nombre)+'">−</button><span class="num" id="q-'+p.id+'">'+c+'</span>':'')+'<button type="button" class="add" data-mas="'+p.id+'" aria-label="Agregar '+esc(p.nombre)+'">+</button></span></div></div>'+
       mis.map((l,k)=>{const idx=lines.indexOf(l);let h='';
@@ -513,6 +528,7 @@ async function enviarPedido(forzarWa){
 }
 function terminar(activo,ult){
   LS.set("pl-activo",activo);LS.set("pl-ultimo",ult);
+  const hist=(LS.get("pl-historial")||[]).filter(x=>x&&Array.isArray(x.items));hist.unshift({fecha:Date.now(),items:ult.items});LS.set("pl-historial",hist.slice(0,15));
   lines=[];render();abrirPantalla();
 }
 
@@ -555,18 +571,30 @@ function renderEnCurso(){
   if(a&&(Date.now()-a.hora>10*36e5||((a.estado==="entregado"||a.estado==="rechazado"||a.estado==="cancelado")&&Date.now()-a.hora>2*36e5))){LS.del("pl-activo");a=null;}
   $("enCurso").innerHTML=a?'<div class="repetir" style="border-style:solid"><span style="font-size:1.8rem">'+(a.estado==="camino"?"🛵":a.estado==="entregado"?"🍕":"🔥")+'</span><span class="tx"><b>Tu pedido '+esc(a.refc)+'</b>'+({recibido:a.pre?"Esperando tu pago":"Recibido",pagado:"Pago confirmado",preparando:"En el horno"+(a.eta?" · llega "+a.eta:""),camino:a.tipo==="Domicilio"?"¡Va en camino!":"¡Listo para recoger!",listo:"¡Listo para recoger!",entregado:"Entregado",rechazado:"No aceptado",cancelado:"Cancelado"})[a.estado]+'</span><button type="button" id="verPedido">Ver</button></div>':"";
   if(a)$("verPedido").onclick=abrirPantalla;
-  const u=LS.get("pl-ultimo");
-  $("repetir").innerHTML=!a&&u&&!lines.length?'<div class="repetir"><span style="font-size:1.8rem">🔁</span><span class="tx"><b>¿Lo de siempre?</b>'+esc(u.resumen)+'</span><button type="button" id="btnRepetir">Repetir</button></div>':"";
-  if($("btnRepetir"))$("btnRepetir").onclick=()=>{
-    lines=[];u.items.forEach(it=>{const p=prods.find(x=>norm(x.nombre)===norm(it.n));if(p)lines.push({pid:p.id,orilla:!!it.o&&!p.bebida,ing:Array.isArray(it.i)?it.i.slice(0,2):[],cant:Math.max(1,parseInt(it.c,10)||1)});});
-    render();renderEnCurso();toast("¡Listo! Revisa tu pedido 👇");$("sec-pedido").scrollIntoView({behavior:"smooth"});};
+  const u=LS.get("pl-ultimo");const enMarcha=a&&!["entregado","rechazado","cancelado"].includes(a.estado);
+  const lineasDe=u=>{const out=[];(u.items||[]).forEach(it=>{const p=prods.find(x=>norm(x.nombre)===norm(it.n));if(p)out.push({pid:p.id,orilla:!!it.o&&!p.bebida,ing:Array.isArray(it.i)?it.i.slice(0,2):[],cant:Math.max(1,parseInt(it.c,10)||1)});});return out;};
+  if(!enMarcha&&u&&!lines.length){
+    const ls=lineasDe(u);
+    if(ls.length){
+      const guard=lines;lines=ls;const tot=calc().total;lines=guard;
+      const g=LS.get("pl-cliente")||{};const nom=String(g.nom||"").trim().split(" ")[0];
+      const dias=Math.floor((Date.now()-(u.fecha||Date.now()))/864e5);
+      const saludo=(nom?"¡Hola "+esc(nom)+"! 👋 ":"¡Hola de nuevo! 👋 ")+(dias>=14?"Te extrañamos 🌙 ":"");
+      $("repetir").innerHTML='<div class="otra-vez"><div class="ov-t">'+saludo+'<b>¿Se te antoja lo de siempre?</b></div>'+
+        '<div class="ov-items">'+ls.map(l=>'<span>'+l.cant+' × '+esc(nombreL(l))+(l.orilla?' + orilla':'')+'</span>').join("")+'</div>'+
+        '<div class="ov-acts"><span class="num">Hoy: <b class="gold-text">'+money(tot)+'</b>'+(tipo==="Domicilio"&&colSel?' <small>con envío</small>':'')+'</span><button type="button" id="btnRepetir">Pedir lo mismo</button></div>'+
+        '<button type="button" class="ov-no" id="btnOtraCosa">Quiero algo diferente</button></div>';
+      $("btnRepetir").onclick=()=>{lines=lineasDe(u);render();renderEnCurso();toast("¡Listo! Tus datos ya están, solo confirma 👇");$("datos").scrollIntoView({behavior:"smooth",block:"start"});};
+      $("btnOtraCosa").onclick=()=>{$("repetir").innerHTML="";$("sec-pizzas").scrollIntoView({behavior:"smooth"});};
+    }else $("repetir").innerHTML="";
+  }else $("repetir").innerHTML="";
 }
 
 // ---------- estrellas ----------
 {const s=$("stars");let h="";for(let i=0;i<18;i++)h+='<i style="left:'+(Math.random()*100)+'%;top:'+(Math.random()*90)+'%;animation-delay:'+(Math.random()*4).toFixed(2)+'s"></i>';s.innerHTML=h;}
 
 renderTop();renderEnvio();render();renderEnCurso();
-(async()=>{try{await leerClima();}catch(_){}renderTop();renderEnvio();renderCart();})();
+(async()=>{try{await leerClima();}catch(_){}renderTop();renderEnvio();renderCart();renderEnCurso();})();
 leerEstado();setInterval(()=>{if(!document.hidden)leerEstado();},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)leerEstado();});
 {const a=LS.get("pl-activo");if(a&&a.seg&&!["entregado","rechazado","cancelado"].includes(a.estado)){revisarEstado();setInterval(()=>{if(!document.hidden&&$("pantalla").hidden)revisarEstado();},20000);}}
